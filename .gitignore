@@ -1,0 +1,54 @@
+# Laravel
+/vendor
+/node_modules
+.env
+.env.backup
+.env.*.local
+/public/hot
+/public/storage
+/storage/*.key
+/bootstrap/cache
+/public/build # Для Vite/Mix
+
+# Docker
+.dockerignore
+docker-compose.override.yml # Если вы используете локальные переопределения, которые не хотите коммитить
+/docker/data # Папка для данных БД, если вы её создаёте в корне Docker-конфига
+/.docker # Скрытые Docker-файлы/папки
+
+# Node.js / React / Inertia / TypeScript
+/node_modules
+npm-debug.log
+yarn-error.log
+.pnpm-store/ # Если используете pnpm
+/build # Output directory for compiled assets (if not public/build)
+/dist # Another common output directory
+/.tsbuildinfo # TypeScript build info file
+*.tsbuildinfo
+*.log
+*.sqlite
+.idea/ # PhpStorm/WebStorm IDE files
+.vscode/ # VS Code specific files (unless you want to share specific settings)
+.DS_Store # macOS specific files
+Thumbs.db # Windows specific files
+
+# Composer
+composer.lock
+
+# Vite
+.vite/
+
+# Тестирование (если используете)
+/coverage
+/.phpunit.result.cache
+
+# Различные временные файлы и логи
+*.log
+*.backup
+*.swp
+*.swo
+
+# Пользовательские файлы, которые не должны быть в репозитории
+# Например, если вы создаете файлы для локальной разработки, которые не относятся к проекту.
+# my_local_config.php
+# my_local_script.sh

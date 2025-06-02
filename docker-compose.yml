@@ -1,0 +1,38 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000" # Проброс порта для FPM
+    volumes:
+      - .:/var/www/html:delegated
+    environment:
+      - APP_ENV=local
+      - APP_DEBUG=true
+      - APP_KEY=${APP_KEY}
+      - DB_HOST=${DB_HOST}
+      - DB_PORT=${DB_PORT}
+      - DB_DATABASE=${DB_DATABASE}
+      - DB_USERNAME=${DB_USERNAME}
+      - DB_PASSWORD=${DB_PASSWORD}
+    depends_on:
+      - postgres
+    command: >
+        sh -c "php artisan serve --host=0.0.0.0 --port=8000"
+
+  # POSTGRES
+  postgres:
+    image: postgres:13
+    environment:
+      - POSTGRES_DB=${DB_DATABASE}
+      - POSTGRES_USER=${DB_USERNAME}
+      - POSTGRES_PASSWORD=${DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+networks:
+  app-network:
+
+volumes:
+  postgres_data:
