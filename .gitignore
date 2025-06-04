@@ -7,7 +7,7 @@
 /public/hot
 /public/storage
 /storage/*.key
-/bootstrap/cache
+/bootstrap/cache/*
 /public/build # Для Vite/Mix
 
 # Docker
@@ -33,7 +33,7 @@ yarn-error.log
 Thumbs.db # Windows specific files
 
 # Composer
-composer.lock
+#composer.lock
 
 # Vite
 .vite/
