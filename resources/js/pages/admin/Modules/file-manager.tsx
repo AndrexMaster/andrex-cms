@@ -5,8 +5,7 @@ import { MakeDirPopUp } from '@components/Modules/FileManager/pop-up';
 
 export default function FileManager(props) {
     const {
-        directories,
-        files
+        directory: mainDirectory
     } = props
 
     //TODO: Написать thunk для подгрузки вложенности
@@ -28,7 +27,7 @@ export default function FileManager(props) {
     return (
         <AppLayout>
             <AdminContentLayout contentActions={<FileManagerActions/>}>
-                <FileManagerList directories={directories} files={files}/>
+                <FileManagerList mainDirectory={mainDirectory}/>
                 <MakeDirPopUp/>
             </AdminContentLayout>
         </AppLayout>

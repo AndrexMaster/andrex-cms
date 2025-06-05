@@ -29,7 +29,7 @@ class FileManagerDirectory extends Model
 
     public function parent()
     {
-        return $this->belongsTo(FileManagerDirectory::class, 'parent_id');
+        return $this->belongsTo(FileManagerDirectory::class, 'parent_id', 'id');
     }
 
     public function children()

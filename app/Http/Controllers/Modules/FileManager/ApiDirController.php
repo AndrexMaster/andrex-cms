@@ -23,20 +23,18 @@ class ApiDirController
     public function show($id): JsonResponse
     {
         try {
-            $bigTreeDirectory = FileManagerDirectory::query()
-                ->findOrFail($id)
-                ->with(['parent'])
-                ->with([
-                    'children.children',
-                    'children.files',
-                    'files'
-                ])
-            ->first();
+            $directory = FileManagerDirectory::with([
+                'parent',
+                'parent.children',
+                'parent.files',
+                'files',
+                'children.children',
+                'children.files',
+            ])
+            ->findOrFail($id);
 
-            $directory = FileManagerDirectory::query()->findOrFail($id);
             return response()->json([
-                'current_directory' => $directory,
-                'big_tree_directory' => $bigTreeDirectory,
+                'directory' => $directory,
             ]);
 
         } catch (ValidationException $e) {
@@ -62,20 +60,15 @@ class ApiDirController
         try {
             $validatedData = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
-                'parent_id' => ['nullable', 'uuid', 'exists:file_manager_directories,id'],
+                'parent_id' => ['required', 'uuid', 'exists:file_manager_directories,id'],
             ]);
 
             $name = $validatedData['name'];
-            $parentId = $validatedData['parent_id'] ?? null;
+            $parentId = $validatedData['parent_id'];
 
-            $existingDirectory = FileManagerDirectory::where('name', $name)
-                ->where(function ($query) use ($parentId) {
-                    if ($parentId === null) {
-                        $query->whereNull('parent_id');
-                    } else {
-                        $query->where('parent_id', $parentId);
-                    }
-                })
+            $existingDirectory = FileManagerDirectory::query()
+                ->where('name', $name)
+                ->where('parent_id', $parentId)
                 ->first();
 
             if ($existingDirectory) {
@@ -84,11 +77,11 @@ class ApiDirController
                 ], 409);
             }
 
-            // 3. Создание директории (UUID геерируется в модели в boot() методе)
-            $directory = FileManagerDirectory::create([
-                'name' => $name,
-                'parent_id' => $parentId,
-            ]);
+            $directory = FileManagerDirectory::query()
+                ->create([
+                    'name' => $name,
+                    'parent_id' => $parentId,
+                ]);
 
             return response()->json([
                 'message' => 'Директория успешно создана.',
@@ -208,5 +201,32 @@ class ApiDirController
                 'message' => 'Произошла непредвиденная ошибка при удалении директорий: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    /**
+     * Возвращает объект директории с рекурсивно вложенными родительскими директориями.
+     *
+     * @param string $currentDirId ID текущей директории.
+     * @return JsonResponse
+     */
+    public function showBreadcrumbs(string $currentDirId)
+    {
+        $breadcrumbs = [];
+        $current = FileManagerDirectory::find($currentDirId);
+
+        if (!$current) {
+            abort(404);
+        }
+
+        while ($current) {
+            array_unshift($breadcrumbs, [
+                'id' => $current->id,
+                'name' => $current->name,
+            ]);
+
+            $current = $current->parent;
+        }
+
+        return response()->json(['breadcrumbs' => $breadcrumbs]);
     }
 }

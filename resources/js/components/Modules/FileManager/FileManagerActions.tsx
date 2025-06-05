@@ -17,16 +17,11 @@ export const FileManagerActions = () => {
 
     const createDir = () => {
         dispatch(handleMakeDirPopUp())
-
-        // dispatch(createFileManagerDirectory({
-        //     name: 'test',
-        //     parent_id: currentDir.id ?? null
-        // }))
     }
 
-    useEffect(() => {
-        dispatch(fetchFileManagerDirectory('45206061-152f-490d-9c01-47a2a6d0b6bc')); // Загружаем корневые элементы (directoryId = null)
-    }, [dispatch]);
+    // useEffect(() => {
+    //     dispatch(fetchFileManagerDirectory('45206061-152f-490d-9c01-47a2a6d0b6bc')); // Загружаем корневые элементы (directoryId = null)
+    // }, [dispatch]);
 
     return (
         <div className={'flex gap-4'}>

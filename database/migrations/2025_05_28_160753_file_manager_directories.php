@@ -2,7 +2,9 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Str;
 
 return new class extends Migration
 {
@@ -25,6 +27,14 @@ return new class extends Migration
             ->on('file_manager_directories')
             ->onDelete('set null');
         });
+
+        DB::table('file_manager_directories')->insert([
+            'id' => Str::uuid(),
+            'name' => 'root',
+            'parent_id' => null,
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
     }
 
     /**

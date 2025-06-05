@@ -1,72 +1,99 @@
-import { FileManagerDir, FileManagerTree } from '@types/Modules/file-manager';
+import { FileManagerDir, FileManagerFile, FileManagerTree } from '@types/Modules/file-manager';
+import { current } from '@reduxjs/toolkit';
+
+function isDirectory(item: FileManagerDir | FileManagerFile): item is FileManagerDir {
+    return 'children' in item && Array.isArray(item.children);
+}
 
 /**
  * Добавляет новую директорию в древо.
- * @param tree Текущее древо директорий.
+ * @param currentChildren Дети текущей директории.
  * @param newDir Объект новой директории.
  * @param parentId ID родительской директории (null для корневых).
- * @returns Новое древо с добавленной директорией.
+ * @returns Новое новый currentDir с добавленной директорией.
  */
-export const addDirectoryToTree = (
-    tree: FileManagerTree,
+export const addDirectoryToCurrent = (
+    currentChildren: FileManagerDir,
     newDir: FileManagerDir,
     parentId: string | null
-): FileManagerTree => {
+): FileManagerDir[] => {
     if (parentId === null) {
-        // Добавляем в корень, если parentId null
-        return [...tree, newDir];
+        return [...currentChildren, newDir];
     }
 
-    return tree.map(dir => {
-        if (dir.id === parentId) {
-            // Нашли родителя, добавляем в его children
-            return {
-                ...dir,
-                children: [...(dir.children || []), newDir]
-            };
-        } else if (dir.children && dir.children.length > 0) {
-            // Рекурсивно ищем среди детей
-            return {
-                ...dir,
-                children: addDirectoryToTree(dir.children, newDir, parentId)
-            };
+    if (currentChildren.id === parentId) {
+        return [...currentChildren.children, newDir]
+    }
+
+    return currentChildren.children.map(item => {
+        if (isDirectory(item)) {
+            console.log('isDirectory');
+            if (item.id === parentId) {
+                console.log('item.id === parentId');
+                return {
+                    ...item,
+                    children: [...item.children, newDir]
+                };
+            } else {
+                console.log('else');
+                const updatedChildren = addDirectoryToCurrent(item, newDir, parentId);
+
+                if (updatedChildren !== item.children) {
+                    return {
+                        ...item,
+                        children: updatedChildren as FileManagerDir[] // <--- Приведение типа
+                    };
+                }
+            }
         }
-        return dir; // Возвращаем директорию как есть, если не родитель
+        console.log('isDirectory false');
+
+        return item;
     });
 };
 
 /**
  * Обновляет директорию в древе (например, заменяет оптимистичную на реальную).
  * Оптимистичная директория это папка добавленная в ui до получения подтверждения
- * @param tree Текущее древо директорий.
+ * @param currentChildren Дети текущей директории.
  * @param idToFind ID (tempId или реальный) директории, которую нужно найти.
  * @param updatedDirData Новые данные директории.
  * @param useTempId Использовать ли tempId для поиска.
  * @returns Новое древо с обновленной директорией.
  */
-export const updateDirectoryInTree = (
-    tree: FileManagerTree,
+export const updateDirectoryInCurrent = (
+    currentChildren: FileManagerDir,
     idToFind: string,
     updatedDirData: FileManagerDir,
     useTempId: boolean = true
-): FileManagerTree => {
-    return tree.map(dir => {
-        const matchesId = useTempId ? (dir.tempId === idToFind) : (dir.id === idToFind);
+): FileManagerDir[] => {
+    return currentChildren.children.map(dir => {
+        if (isDirectory(dir)) {
+            const matchesId = useTempId ? (dir?.tempId === idToFind) : (dir.id === idToFind);
+            console.log('useTempId', useTempId);
+            console.log('dir', current(dir));
+            console.log('idToFind', idToFind);
+            console.log('matchesId ===', matchesId);
+            console.log('updatedDirData', updatedDirData);
 
-        if (matchesId) {
-            return {
-                ...updatedDirData,
-                isOptimistic: false,
-                tempId: undefined,
-                children: updatedDirData.children || dir.children,
-                files: updatedDirData.files || dir.files,
-            };
-        } else if (dir.children && dir.children.length > 0) {
-            // Рекурсивно ищем среди детей
-            return {
-                ...dir,
-                children: updateDirectoryInTree(dir.children, idToFind, updatedDirData, useTempId)
-            };
+            if (matchesId) {
+                return {
+                    ...updatedDirData,
+                    isOptimistic: false,
+                    tempId: undefined,
+                    children: updatedDirData.children || dir.children,
+                    files: updatedDirData.files || dir.files,
+                };
+            } else if (dir.children && dir.children.length > 0) {
+                const updatedChildren = updateDirectoryInCurrent(dir, idToFind, updatedDirData, useTempId)
+
+                if (updatedChildren !== dir.children) {
+                    return {
+                        ...dir,
+                        children: updatedChildren as FileManagerDir[] // <--- Приведение типа
+                    };
+                }
+            }
         }
         return dir;
     });
@@ -74,29 +101,36 @@ export const updateDirectoryInTree = (
 
 /**
  * Удаляет директорию из древа.
- * @param tree Текущее древо директорий.
+ * @param currentChildren Дети текущей директории.
  * @param idToRemove ID (tempId или реальный) директории, которую нужно удалить.
  * @param useTempId Использовать ли tempId для поиска.
  * @returns Новое древо без удаленной директории.
  */
-export const removeDirectoryFromTree = (
-    tree: FileManagerTree,
+export const removeDirectoryFromCurrent = (
+    currentChildren: FileManagerDir,
     idToRemove: string,
     useTempId: boolean = true
-): FileManagerTree => {
-    console.log('tree', tree);
-    const filteredTree = tree.filter(dir => {
-        const matchesId = useTempId ? (dir.tempId === idToRemove) : (dir.id === idToRemove);
-        return !matchesId;
+): FileManagerDir[] => {
+    const filteredItems = currentChildren.children.filter(item => {
+        const targetId = useTempId ? item.tempId : item.id;
+        return targetId !== idToRemove;
     });
 
-    return filteredTree.map(dir => {
-        if (dir.children && dir.children.length > 0) {
-            return {
-                ...dir,
-                children: removeDirectoryFromTree(dir.children, idToRemove, useTempId)
-            };
+    return filteredItems.map(item => {
+        if (isDirectory(item)) {
+            const updatedChildren = removeDirectoryFromCurrent(
+                item as FileManagerDir,
+                idToRemove,
+                useTempId
+            );
+
+            if (updatedChildren !== item.children) {
+                return {
+                    ...item,
+                    children: updatedChildren as FileManagerDir[]
+                };
+            }
         }
-        return dir;
+        return item;
     });
 };

@@ -1,7 +1,7 @@
-import { createSlice, PayloadAction } from '@reduxjs/toolkit';
+import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
 import { FileManagerDir, FileManagerTree } from '@types/Modules/file-manager';
 import { createFileManagerDirectory, fetchFileManagerDirectory } from '@store/thunks/Modules';
-import { addDirectoryToTree, removeDirectoryFromTree, updateDirectoryInTree } from '@store/utils';
+import { addDirectoryToCurrent, removeDirectoryFromCurrent, updateDirectoryInCurrent } from '@store/utils';
 
 interface FileManagerState {
     tree: FileManagerTree | null;
@@ -12,7 +12,7 @@ interface FileManagerState {
 }
 
 const initialState: FileManagerState = {
-    tree: null,
+    tree: null, // TODO: Не факт что нужно
     currentDir: null,
     loading: false,
     error: null,
@@ -27,7 +27,6 @@ const fileManagerSlice = createSlice({
     reducers: {
         setCurrentDir: (state, action: PayloadAction<FileManagerDir>) => {
             state.currentDir = action.payload
-            console.log('state.tree', state.tree);
         },
         setFileManagerTree: (state, action: PayloadAction<FileManagerTree>) => {
             state.tree = action.payload
@@ -49,29 +48,27 @@ const fileManagerSlice = createSlice({
             .addCase(fetchFileManagerDirectory.fulfilled, (state: FileManagerState, action) => {
                 state.loading = false;
                 state.error = null;
-                state.tree = action.payload;
-                if (action.payload?.length > 0 && !state.currentDir) {
-                    state.currentDir = action.payload[0];
-                }
+                state.currentDir = action.payload.directory;
             })
             .addCase(fetchFileManagerDirectory.rejected, (state: FileManagerState, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
-                state.tree = null;
                 state.currentDir = null;
             })
 
+            // Create folder
             .addCase(createFileManagerDirectory.pending, (state: FileManagerState, action) => {
                 state.loading = true;
                 state.error = null;
 
                 const { name, parent_id } = action.meta.arg;
                 const tempId = action.meta.requestId;
+                const parentId = parent_id ?? '';
 
                 const optimisticDir: FileManagerDir = {
                     id: tempId,
                     name: name,
-                    parent_id: parent_id || null,
+                    parent_id: parentId,
                     created_at: new Date().toISOString(),
                     updated_at: new Date().toISOString(),
                     files: [],
@@ -80,37 +77,39 @@ const fileManagerSlice = createSlice({
                     tempId: tempId,
                 };
 
-                if (state.tree) {
-                    state.tree = addDirectoryToTree(state.tree, optimisticDir, parent_id);
-                } else {
-                    state.tree = [optimisticDir];
-                }
-
-                if (state.currentDir && state.currentDir.id === parent_id) {
+                if (state.currentDir) {
                     state.currentDir = {
                         ...state.currentDir,
-                        children: [...(state.currentDir.children || []), optimisticDir]
-                    };
-                } else if (state.currentDir === null && parent_id === null) {
-                    state.currentDir = {
-                        ...optimisticDir,
-                    };
+                        children: addDirectoryToCurrent(state.currentDir, optimisticDir, parentId)
+                    }
                 }
+
+                // Открывает созданную директорию после добавления
+                // TODO: Сделать галочкой (хотите открыть дирректорию после создания?
+                //  После получения положительного ответа открывать)
+                // if (state.currentDir && state.currentDir.id === parent_id) {
+                //     state.currentDir = {
+                //         ...state.currentDir,
+                //         children: [...(state.currentDir.children || []), optimisticDir]
+                //     };
+                // } else if (state.currentDir === null && parent_id === null) {
+                //     state.currentDir = {
+                //         ...optimisticDir,
+                //     };
+                // }
             })
             .addCase(createFileManagerDirectory.fulfilled, (state: FileManagerState, action) => {
                 state.loading = false;
                 state.error = null;
 
-                const { data: realDir, tempId, parentId } = action.payload;
-
-                if (state.tree && tempId) {
-                    state.tree = updateDirectoryInTree(state.tree, tempId, realDir);
-                }
+                const { data: response, parentId } = action.payload;
+                const tempId = action.meta.requestId;
+                console.log('fulfilled - tempId', tempId);
 
                 if (state.currentDir && state.currentDir.id === parentId && tempId) {
                     state.currentDir = {
                         ...state.currentDir,
-                        children: updateDirectoryInTree(state.currentDir.children || [], tempId, realDir)
+                        children: updateDirectoryInCurrent(state.currentDir, tempId, response.directory as FileManagerDir)
                     };
                 }
             })
@@ -120,18 +119,21 @@ const fileManagerSlice = createSlice({
                 const tempId = action.meta.requestId;
                 const { parent_id } = action.meta.arg;
 
-                if (state.tree && tempId) {
-                    console.log('state', state);
-                    state.tree = removeDirectoryFromTree(state.tree, tempId, true)
+                if (state.currentDir && tempId) {
+                    state.currentDir = {
+                        ...state.currentDir,
+                        children: removeDirectoryFromCurrent(state.currentDir, tempId, true)
+                    }
                 }
 
                 if (state.currentDir && state.currentDir.id === parent_id && tempId) {
                     state.currentDir = {
                         ...state.currentDir,
-                        children: removeDirectoryFromTree(state.currentDir.children || [], tempId, true)
+                        children: removeDirectoryFromCurrent(state.currentDir, tempId, true)
                     };
                 }
-            });
+            })
+
     },
 });
 

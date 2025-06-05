@@ -18,19 +18,17 @@ class ManagerWebController extends Controller
      */
     public function index(Request $request): Response
     {
-        $directories = FileManagerDirectory::query()
+        $directory = FileManagerDirectory::query()
             ->whereNull('parent_id')
             ->with([
                 'files',
                 'children.children',
                 'children.files'
-            ])->get();
-        $files = FileManagerFile::query()->whereNull('directory_id')->get();
+            ])->first();
 
 //        return response()->json($directories);
         return Inertia::render('admin/Modules/file-manager', [
-            'directories' => $directories,
-            'files' => $files
+            'directory' => $directory,
         ]);
     }
 }

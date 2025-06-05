@@ -1,8 +1,9 @@
-import { FileManagerDir, FileManagerFile } from '@types/Modules/file-manager';
+import { FileManagerDir, FileManagerFile, FileManagerTree } from '@types/Modules/file-manager';
 import { Attributes } from 'react';
 import { Folder, File, Folders } from 'lucide-react';
 import { useAppDispatch } from '@store/hooks';
-import { setCurrentDir } from '@store/slices/Modules/fileManagerSlice';
+import { setCurrentDir, setFileManagerTree } from '@store/slices/Modules/fileManagerSlice';
+import { fetchFileManagerDirectory } from '@store/thunks/Modules';
 
 interface ManagerItemProps extends Attributes {
     item: FileManagerDir | FileManagerFile;
@@ -22,7 +23,7 @@ const ItemIcon = (props: ItemIconProps) => {
 
     switch (iconType) {
         case 'file':
-            if ((item as FileManagerFile)?.url.length > 0) {
+            if ((item as FileManagerFile)?.url?.length > 0) {
                 return <img width={80} src={(item as FileManagerFile).url}/>
             } else {
                 return <File />;
@@ -50,7 +51,14 @@ export const ManagerItem = (props: ManagerItemProps) => {
 
     const open = () => {
         if (type !== 'directory') return
-        dispatch(setCurrentDir(item as FileManagerDir))
+        dispatch(fetchFileManagerDirectory(item.id))
+        dispatch(
+            setFileManagerTree([
+                ...(item as FileManagerDir)?.children,
+                ...(item as FileManagerDir)?.files
+            ] as FileManagerTree)
+        )
+
     }
 
 

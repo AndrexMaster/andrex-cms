@@ -19,4 +19,7 @@ Route::prefix('file-manager')->group(function () {
         Route::delete('/', [ApiFileController::class, 'destroy'])->name('file-manager.destroy');
     });
 
+    Route::get('/breadcrumbs/{currentDirId}', [ApiDirController::class, 'showBreadcrumbs'])
+        ->name('file-manager.showBreadcrumbs');
+
 });

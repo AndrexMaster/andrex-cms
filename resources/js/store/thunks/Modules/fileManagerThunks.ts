@@ -6,7 +6,7 @@ import { nanoid } from 'nanoid';
 /*
 * Directories
 * */
-export const fetchFileManagerTree = createAsyncThunk(
+export const fetchFileManagerDirectoryTree = createAsyncThunk(
     'fileManager/fetchTree',
     async (directoryId: string | null = null, { rejectWithValue }) => {
         try {
@@ -20,7 +20,7 @@ export const fetchFileManagerTree = createAsyncThunk(
 );
 
 export const fetchFileManagerDirectory = createAsyncThunk(
-    'fileManager/fetchTree',
+    'fileManager/fetchDirectory',
     async (directoryId: string, { rejectWithValue }) => {
         try {
             const url = `/api/v1/admin/file-manager/${directoryId}`;
