@@ -21,6 +21,7 @@ export const MakeDirPopUp = () => {
 
     useEffect(() => {
         setFolderName('')
+        console.log('isPopUpOpen', isPopUpOpen);
     }, [isPopUpOpen]);
 
     return (

@@ -27,3 +27,8 @@ export type FileManagerFile = {
     tempId?: string;
     isOptimistic?: boolean;
 }
+
+export type FileManagerBreadcrumb = {
+    id: string;
+    name: string;
+}

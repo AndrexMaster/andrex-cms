@@ -2,7 +2,7 @@ import { FileManagerDir, FileManagerFile, FileManagerTree } from '@types/Modules
 import { ManagerItem } from '@components/Modules/FileManager';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { useEffect, useMemo } from 'react';
-import { setCurrentDir, setFileManagerTree } from '@store/slices/Modules/fileManagerSlice';
+import { setBreadcrumbs, setCurrentDir, setFileManagerTree } from '@store/slices/Modules/fileManagerSlice';
 
 interface FileManagerListProps {
     mainDirectory: FileManagerDir;
@@ -17,6 +17,7 @@ export const FileManagerList = (props: FileManagerListProps) => {
     const currentDir: FileManagerDir = useAppSelector((state) => state.fileManager.currentDir);
 
     useEffect(() => {
+        dispatch(setBreadcrumbs([]));
         dispatch(setCurrentDir(mainDirectory))
     }, [dispatch]);
 

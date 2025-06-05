@@ -21,10 +21,13 @@ export const fetchFileManagerDirectoryTree = createAsyncThunk(
 
 export const fetchFileManagerDirectory = createAsyncThunk(
     'fileManager/fetchDirectory',
-    async (directoryId: string, { rejectWithValue }) => {
+    async (directoryId: string, { dispatch, rejectWithValue }) => {
         try {
             const url = `/api/v1/admin/file-manager/${directoryId}`;
             const response = await axios.get(url);
+
+            await dispatch(getBreadcrumbs(directoryId));
+
             return response.data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || error.message || 'Ошибка загрузки');
@@ -32,22 +35,20 @@ export const fetchFileManagerDirectory = createAsyncThunk(
     }
 );
 
-// Возвращаем объект, который включает реальные данные и параметры,
-// использованные для оптимистичного обновления
 interface CreateDirectoryResponse {
-    data: FileManagerDir; // Данные, которые пришли с сервера
-    tempId: string; // Временный ID, который мы создали
-    parentId: string | null; // ID родительской директории
+    data: FileManagerDir;
+    tempId: string;
+    parentId: string | null;
 }
 
 export const createFileManagerDirectory = createAsyncThunk<
-    CreateDirectoryResponse, // Тип возвращаемого значения (fulfilled.payload)
-    { name: string; parent_id?: string | null }, // Тип аргументов thunk'а
-    { rejectValue: string } // Тип rejectValue
+    CreateDirectoryResponse,
+    { name: string; parent_id?: string | null },
+    { rejectValue: string }
 >(
-    'fileManager/createDirectory', // Имя действия, было 'uploadFile'
+    'fileManager/createDirectory',
     async ({ name, parent_id = null }, { rejectWithValue }) => {
-        const tempId = nanoid(); // Генерируем временный ID
+        const tempId = nanoid();
 
         try {
             const url = '/api/v1/admin/file-manager';
@@ -55,12 +56,12 @@ export const createFileManagerDirectory = createAsyncThunk<
                 name: name,
                 parent_id: parent_id,
             };
-            const response = await axios.post<FileManagerDir>(url, newDirData); // Ожидаем FileManagerDir от сервера
+            const response = await axios.post<{directory: FileManagerDir}>(url, newDirData);
 
             return {
-                data: response.data, // Реальные данные, пришедшие с сервера (с настоящим ID)
-                tempId: tempId,       // Возвращаем временный ID для сопоставления
-                parentId: parent_id,  // Возвращаем parent_id для сопоставления
+                data: response.data,
+                tempId: tempId,
+                parentId: parent_id,
             };
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || error.message || 'Ошибка создания папки');
@@ -84,3 +85,22 @@ export const updateFileManagerDirectory = createAsyncThunk(
 /*
 * Files
 * */
+
+
+/*
+* Breadcrumbs
+* */
+
+
+export const getBreadcrumbs = createAsyncThunk(
+    'fileManager/getBreadcrumbs',
+    async (currentDirectoryId: string, { rejectWithValue }) => {
+        try {
+            const url = `/api/v1/admin/file-manager/breadcrumbs/${currentDirectoryId}`;
+            const response = await axios.get(url);
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || error.message || 'Ошибка загрузки');
+        }
+    }
+);

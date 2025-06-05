@@ -1,6 +1,6 @@
 import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
 import { FileManagerDir, FileManagerTree } from '@types/Modules/file-manager';
-import { createFileManagerDirectory, fetchFileManagerDirectory } from '@store/thunks/Modules';
+import { createFileManagerDirectory, fetchFileManagerDirectory, getBreadcrumbs } from '@store/thunks/Modules';
 import { addDirectoryToCurrent, removeDirectoryFromCurrent, updateDirectoryInCurrent } from '@store/utils';
 
 interface FileManagerState {
@@ -9,6 +9,7 @@ interface FileManagerState {
     loading: boolean;
     error: string | null;
     isMakeDirPopUpOpen: boolean;
+    breadcrumbs: {id: string, name: string}[];
 }
 
 const initialState: FileManagerState = {
@@ -17,6 +18,7 @@ const initialState: FileManagerState = {
     loading: false,
     error: null,
     isMakeDirPopUpOpen: false,
+    breadcrumbs: []
 };
 
 // TODO: Добавлять новую директорию в дерево Redux
@@ -37,6 +39,9 @@ const fileManagerSlice = createSlice({
         handleMakeDirPopUp: (state, action: PayloadAction<boolean | undefined>) => {
             state.isMakeDirPopUpOpen = action.payload ?? !state.isMakeDirPopUpOpen
         },
+        setBreadcrumbs: (state, action) => {
+            state.breadcrumbs = action.payload
+        }
     },
     extraReducers: (builder) => {
         builder
@@ -44,22 +49,26 @@ const fileManagerSlice = createSlice({
             .addCase(fetchFileManagerDirectory.pending, (state: FileManagerState) => {
                 state.loading = true;
                 state.error = null;
+                state.isMakeDirPopUpOpen = false;
             })
             .addCase(fetchFileManagerDirectory.fulfilled, (state: FileManagerState, action) => {
                 state.loading = false;
                 state.error = null;
                 state.currentDir = action.payload.directory;
+                state.isMakeDirPopUpOpen = false
             })
             .addCase(fetchFileManagerDirectory.rejected, (state: FileManagerState, action) => {
                 state.loading = false;
                 state.error = action.payload as string;
                 state.currentDir = null;
+                state.isMakeDirPopUpOpen = false
             })
 
             // Create folder
             .addCase(createFileManagerDirectory.pending, (state: FileManagerState, action) => {
                 state.loading = true;
                 state.error = null;
+                state.isMakeDirPopUpOpen = false
 
                 const { name, parent_id } = action.meta.arg;
                 const tempId = action.meta.requestId;
@@ -132,13 +141,26 @@ const fileManagerSlice = createSlice({
                         children: removeDirectoryFromCurrent(state.currentDir, tempId, true)
                     };
                 }
+
+                // Todo: выводить ошибку вместе со всплывашкой
+                state.isMakeDirPopUpOpen = true
             })
 
+            // Breadcrumbs
+            .addCase(getBreadcrumbs.fulfilled, (state: FileManagerState, action) => {
+                const { breadcrumbs } = action.payload;
+
+                state.breadcrumbs = breadcrumbs;
+            })
+            .addCase(getBreadcrumbs.rejected, (state: FileManagerState, action) => {
+
+            })
     },
 });
 
 export const {
     setCurrentDir, setFileManagerTree,
-    handleMakeDirPopUp, updateTree
+    handleMakeDirPopUp, updateTree,
+    setBreadcrumbs,
 } = fileManagerSlice.actions;
 export default fileManagerSlice.reducer;

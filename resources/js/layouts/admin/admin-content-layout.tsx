@@ -2,19 +2,27 @@ import { JSX, ReactNode } from 'react';
 import { PageIcon } from '@components/';
 import AdminSidebarLayout from '@layouts/admin/admin-sidebar-layout';
 import { getPageTitle } from '@hooks/use-breadcrumbs';
-import { AdminContentLayoutActions, AdminContentLayoutActionsProps } from '@components/adminContent';
+import { AdminContentLayoutActions } from '@components/adminContent';
+import { FileManagerBreadcrumb } from '@types/Modules/file-manager';
+import { ChevronRight } from 'lucide-react';
 
 export interface AdminContentLayoutInterface{
     children: ReactNode;
     contentActions?: ReactNode | JSX;
     contentActionsVariant?: 'editing' | 'creating' | 'browsing';
+    breadcrumbs?: FileManagerBreadcrumb[]
+    customBreadcrumbAction?: (data: string) => void;
+    customBreadcrumbHeadingAction?: (data: string) => void;
 }
 
 export const AdminContentLayout = (props: AdminContentLayoutInterface) => {
     const {
         children,
         contentActions,
-        contentActionsVariant
+        contentActionsVariant,
+        breadcrumbs,
+        customBreadcrumbAction,
+        customBreadcrumbHeadingAction
     } = props
 
     return (
@@ -45,7 +53,42 @@ export const AdminContentLayout = (props: AdminContentLayoutInterface) => {
                 <div className={'flex items-center justify-between gap-4'}>
                     <div className={'flex items-center gap-2'}>
                         <PageIcon/>
-                        <span>{getPageTitle()}</span>
+                        <span
+                            onClick={() => customBreadcrumbHeadingAction ?
+                                    customBreadcrumbHeadingAction(breadcrumbs?.length > 0 ? breadcrumbs[0]['id'] : null)
+                                :
+                                    null
+                            }
+                            className={customBreadcrumbHeadingAction ? 'cursor-pointer hover:underline' : ''}
+                        >
+                            {getPageTitle()}
+                        </span>
+                        {/* // TODO: Сделать overflow для бредкрамбса*/}
+                        {breadcrumbs && breadcrumbs?.length > 0 && (
+                            <div
+                                className={'flex items-center overflow-x-auto'}
+                            >
+                                {breadcrumbs?.map((breadcrumb, index) => {
+                                    if (index > 0) {
+                                        return (
+                                            <>
+                                                <ChevronRight />
+                                                <span
+                                                    onClick={() => customBreadcrumbAction ?
+                                                            customBreadcrumbAction(breadcrumb.id)
+                                                        :
+                                                            null
+                                                    }
+                                                    className={customBreadcrumbAction ? 'cursor-pointer hover:underline' : ''}
+                                                >
+                                                    {breadcrumb.name}
+                                                </span>
+                                            </>
+                                        )
+                                    }
+                                })}
+                            </div>
+                        )}
                     </div>
                     {contentActions ?? <AdminContentLayoutActions variant={contentActionsVariant}/>}
                 </div>
