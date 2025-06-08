@@ -27,15 +27,12 @@ export const addDirectoryToCurrent = (
 
     return currentChildren.children.map(item => {
         if (isDirectory(item)) {
-            console.log('isDirectory');
             if (item.id === parentId) {
-                console.log('item.id === parentId');
                 return {
                     ...item,
                     children: [...item.children, newDir]
                 };
             } else {
-                console.log('else');
                 const updatedChildren = addDirectoryToCurrent(item, newDir, parentId);
 
                 if (updatedChildren !== item.children) {
@@ -46,8 +43,6 @@ export const addDirectoryToCurrent = (
                 }
             }
         }
-        console.log('isDirectory false');
-
         return item;
     });
 };
@@ -68,6 +63,7 @@ export const updateDirectoryInCurrent = (
     useTempId: boolean = true
 ): FileManagerDir[] => {
     return currentChildren.children.map(dir => {
+        console.log(`isDirectory(dir) ${dir.name} `, isDirectory(dir));
         if (isDirectory(dir)) {
             const matchesId = useTempId ? (dir?.tempId === idToFind) : (dir.id === idToFind);
             console.log('useTempId', useTempId);
@@ -134,3 +130,28 @@ export const removeDirectoryFromCurrent = (
         return item;
     });
 };
+
+
+/**
+ * Зеркалит значение isSelected если оно существует. В противном случае делает его true
+ * @param currentChildren Дети текущей директории.
+ * @param idToFind ID (tempId или реальный) директории, которую нужно удалить.
+ * @returns FileManagerDir[]
+ */
+
+
+export  const handleNodeSelectionHelper = (
+    currentChildren: (FileManagerDir | FileManagerFile)[],
+    idToFind: string
+) => {
+    return currentChildren.map(item => {
+        if (item.id === idToFind) {
+            return {
+                ...item,
+                isSelected: item.isSelected !== undefined ? !item.isSelected : idToFind === item.id
+            }
+        }
+
+        return item
+    })
+}

@@ -1,27 +1,45 @@
 import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
 import { FileManagerDir, FileManagerTree } from '@types/Modules/file-manager';
-import { createFileManagerDirectory, fetchFileManagerDirectory, getBreadcrumbs } from '@store/thunks/Modules';
-import { addDirectoryToCurrent, removeDirectoryFromCurrent, updateDirectoryInCurrent } from '@store/utils';
+import {
+    createFileManagerDirectory,
+    fetchFileManagerDirectory,
+    getBreadcrumbs,
+    updateFileManagerDirectory
+} from '@store/thunks/Modules';
+import {
+    addDirectoryToCurrent,
+    handleNodeSelectionHelper,
+    removeDirectoryFromCurrent,
+    updateDirectoryInCurrent
+} from '@store/utils';
 
 interface FileManagerState {
     tree: FileManagerTree | null;
+
     currentDir: FileManagerDir | null;
+    nodeToUpdate: FileManagerDir | FileManagerState | null;
+
     loading: boolean;
     error: string | null;
     isMakeDirPopUpOpen: boolean;
+    isUpdateNodePopUpOpen: boolean;
     breadcrumbs: {id: string, name: string}[];
+    isSelectable: boolean;
 }
 
 const initialState: FileManagerState = {
     tree: null, // TODO: Не факт что нужно
+
     currentDir: null,
+    nodeToUpdate: null,
+
     loading: false,
     error: null,
+    breadcrumbs: [],
+    isSelectable: false,
     isMakeDirPopUpOpen: false,
-    breadcrumbs: []
+    isUpdateNodePopUpOpen: false,
 };
-
-// TODO: Добавлять новую директорию в дерево Redux
 
 const fileManagerSlice = createSlice({
     name: 'fileManager',
@@ -30,22 +48,47 @@ const fileManagerSlice = createSlice({
         setCurrentDir: (state, action: PayloadAction<FileManagerDir>) => {
             state.currentDir = action.payload
         },
+        setNodeToUpdate: (state, action: PayloadAction<FileManagerDir>) => {
+            state.nodeToUpdate = action.payload
+        },
         setFileManagerTree: (state, action: PayloadAction<FileManagerTree>) => {
             state.tree = action.payload
         },
+        selectNode: (state, action: PayloadAction<string>) => {
+            state.selected
+
+            state.currentDir = {
+                ...state.currentDir,
+                children: handleNodeSelectionHelper(state.currentDir.children, action.payload),
+            }
+        },
+
+        // Tree
         updateTree: (state, action) => {
             state.tree = action.payload
         },
+
+        // Breadcrumbs
+        setBreadcrumbs: (state, action) => {
+            state.breadcrumbs = action.payload
+        },
+
+        //  Handlers
         handleMakeDirPopUp: (state, action: PayloadAction<boolean | undefined>) => {
             state.isMakeDirPopUpOpen = action.payload ?? !state.isMakeDirPopUpOpen
         },
-        setBreadcrumbs: (state, action) => {
-            state.breadcrumbs = action.payload
-        }
+        handleUpdateNodePopUpOpen: (state, action: PayloadAction<boolean | undefined>) => {
+            state.isUpdateNodePopUpOpen = action.payload ?? !state.isUpdateNodePopUpOpen
+        },
+        handleSelectable: (state, action: PayloadAction<boolean | undefined>) => {
+            state.isSelectable = action.payload ?? !state.isSelectable
+        },
     },
     extraReducers: (builder) => {
         builder
-            // Get folder
+            /**
+             * Get directory
+             */
             .addCase(fetchFileManagerDirectory.pending, (state: FileManagerState) => {
                 state.loading = true;
                 state.error = null;
@@ -64,7 +107,10 @@ const fileManagerSlice = createSlice({
                 state.isMakeDirPopUpOpen = false
             })
 
-            // Create folder
+
+            /**
+             * Create directory
+             */
             .addCase(createFileManagerDirectory.pending, (state: FileManagerState, action) => {
                 state.loading = true;
                 state.error = null;
@@ -113,7 +159,6 @@ const fileManagerSlice = createSlice({
 
                 const { data: response, parentId } = action.payload;
                 const tempId = action.meta.requestId;
-                console.log('fulfilled - tempId', tempId);
 
                 if (state.currentDir && state.currentDir.id === parentId && tempId) {
                     state.currentDir = {
@@ -146,21 +191,38 @@ const fileManagerSlice = createSlice({
                 state.isMakeDirPopUpOpen = true
             })
 
-            // Breadcrumbs
+            /**
+             * Update Directory
+             */
+            .addCase(updateFileManagerDirectory.fulfilled, (state: FileManagerState, action) => {
+                const { directory: newDir }: FileManagerDir = action.payload;
+
+                if (state.currentDir && state.currentDir.id === newDir.parent_id) {
+                    state.currentDir = {
+                        ...state.currentDir,
+                        children: updateDirectoryInCurrent(state.currentDir, newDir.id, newDir as FileManagerDir, false)
+                    };
+                }
+
+                state.isUpdateNodePopUpOpen = false
+            })
+
+
+            /**
+             * Get Breadcrumbs
+             */
             .addCase(getBreadcrumbs.fulfilled, (state: FileManagerState, action) => {
                 const { breadcrumbs } = action.payload;
 
                 state.breadcrumbs = breadcrumbs;
-            })
-            .addCase(getBreadcrumbs.rejected, (state: FileManagerState, action) => {
-
             })
     },
 });
 
 export const {
     setCurrentDir, setFileManagerTree,
-    handleMakeDirPopUp, updateTree,
+    handleMakeDirPopUp, handleUpdateNodePopUpOpen,
     setBreadcrumbs,
+    handleSelectable, selectNode, setNodeToUpdate,
 } = fileManagerSlice.actions;
 export default fileManagerSlice.reducer;

@@ -1,21 +1,15 @@
 export type FileManagerTree = (FileManagerDir | FileManagerFile)[]
 
-export type FileManagerDir = {
-    id: string;
-    name: string;
+export type FileManagerDir = DefaultNodeTypes & {
     parent_id: string; // Null only in root directory which count is 1
     created_at: string;
     updated_at: string;
     files: FileManagerFile[];
     children: FileManagerDir[];
-    tempId?: string;
-    isOptimistic?: boolean;
 }
 
-export type FileManagerFile = {
-    id: string;
+export type FileManagerFile = DefaultNodeTypes & {
     directory_id: string;
-    name: string;
     size: number;
     path: string;
     url: string;
@@ -24,11 +18,17 @@ export type FileManagerFile = {
     last_modified_by: string; // User uuid
     upload_date: string;
     last_modified_date: string;
-    tempId?: string;
-    isOptimistic?: boolean;
 }
 
 export type FileManagerBreadcrumb = {
     id: string;
     name: string;
+}
+
+export type DefaultNodeTypes = {
+    id: string;
+    name: string;
+    tempId?: string;
+    isOptimistic?: boolean;
+    isSelected?: boolean;
 }

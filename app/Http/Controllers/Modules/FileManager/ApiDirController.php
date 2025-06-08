@@ -111,6 +111,7 @@ class ApiDirController
     //TODO: Узнать за Route Model Binding
     public function update(Request $request, FileManagerDirectory $directory): JsonResponse
     {
+
         try {
             $validatedData = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
@@ -121,6 +122,7 @@ class ApiDirController
                     'not_in:' . $directory->id,
                 ],
             ]);
+
 
             $newName = $validatedData['name'];
             $newParentId = $validatedData['parent_id'] ?? null;
@@ -148,6 +150,15 @@ class ApiDirController
             $directory->name = $newName;
             $directory->parent_id = $newParentId;
             $directory->save();
+
+            $directory->load([
+                'parent',
+                'parent.children',
+                'parent.files',
+                'files',
+                'children.children',
+                'children.files',
+            ]);
 
             return response()->json([
                 'message' => 'Директория успешно обновлена.',

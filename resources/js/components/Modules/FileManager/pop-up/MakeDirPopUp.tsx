@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { createFileManagerDirectory } from '@store/thunks/Modules';
 import { Plus } from 'lucide-react';
+import { handleMakeDirPopUp } from '@store/slices/Modules/fileManagerSlice';
 
 export const MakeDirPopUp = () => {
     const [folderName, setFolderName] = useState('');
@@ -24,10 +25,15 @@ export const MakeDirPopUp = () => {
         console.log('isPopUpOpen', isPopUpOpen);
     }, [isPopUpOpen]);
 
+    const closePopUp = () => {
+        dispatch(handleMakeDirPopUp(false))
+    }
+
     return (
       <FileManagerPopUpLayout
           heading={'Make new folder?'}
           isPopUpOpen={isPopUpOpen}
+          closeHandler={closePopUp}
       >
           <div className={'flex flex-col justify-between gap-6 flex-1'}>
               <TextField

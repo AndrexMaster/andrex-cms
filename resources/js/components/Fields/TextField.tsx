@@ -1,16 +1,15 @@
-import { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { DefaultFieldProps } from '@types/fields';
 import { FieldLayout } from '@components/Fields/FieldLayout';
 
 interface TextFieldInterface extends DefaultFieldProps {
-
+    value: string;
 }
 
 export const TextField = (props: TextFieldInterface) => {
     const {
         title = '',
         type = 'text',
-        defaultValue = '',
         value,
         disabled = false,
         placeholder = '',
@@ -20,16 +19,16 @@ export const TextField = (props: TextFieldInterface) => {
         onBlur,
     } = props;
 
-    const [inputData, setInputData] = useState(defaultValue);
-    const [isFocused, setIsFocused] = useState(defaultValue?.length > 0);
+    const [isFocused, setIsFocused] = useState(value?.length > 0);
 
     const isTitleRaised = useMemo(() => {
-        return isFocused || defaultValue?.length > 0 || inputData.length > 0
-    }, [isFocused, defaultValue])
+        return isFocused || value?.length > 0;
+    }, [isFocused, value]);
 
     useEffect(() => {
-        setIsFocused(defaultValue.length > 0)
-    }, [defaultValue]);
+        setIsFocused(value?.length > 0);
+    }, [value]);
+
 
     return (
         <FieldLayout
@@ -40,21 +39,22 @@ export const TextField = (props: TextFieldInterface) => {
                 className={`flex bg-[#111] border ${disabled ? 'text-[#717171]' : 'text-current'} rounded-sm px-2 py-1 text-md focus:outline-indigo-600 focus:outline-[1px] focus:outline-solid` + className}
                 placeholder={placeholder}
                 type={type}
-                value={defaultValue}
-                onFocus={() => {
-                    setIsFocused(true)
+                value={value}
+                onFocus={(e) => {
+                    setIsFocused(true);
+                    onFocus && onFocus(e);
                 }}
                 onBlur={(e) => {
-                    setIsFocused(!!e.target.value)
+                    setIsFocused(!!e.target.value);
+                    onBlur && onBlur(e);
                 }}
                 onChange={(e) => {
-                    setInputData(e.target.value)
                     if (!disabled) {
-                        onChange && onChange(e.target.value)
+                        onChange && onChange(e.target.value);
                     }
                 }}
                 disabled={disabled}
             />
         </FieldLayout>
-    )
-}
+    );
+};

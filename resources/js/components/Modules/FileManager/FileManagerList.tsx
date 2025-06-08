@@ -15,6 +15,7 @@ export const FileManagerList = (props: FileManagerListProps) => {
 
     const dispatch = useAppDispatch()
     const currentDir: FileManagerDir = useAppSelector((state) => state.fileManager.currentDir);
+    const isEditable: boolean = useAppSelector((state) => state.fileManager.isEditable);
 
     useEffect(() => {
         dispatch(setBreadcrumbs([]));
@@ -24,10 +25,20 @@ export const FileManagerList = (props: FileManagerListProps) => {
     return (
         <div className={'flex flex-row flex-wrap gap-6'}>
             {currentDir?.children?.map((dir, index) => (
-                <ManagerItem key={index} item={dir} type={'directory'} />
+                <ManagerItem
+                    key={index}
+                    item={dir}
+                    type={'directory'}
+                    isShaking={isEditable}
+                />
             ))}
             {currentDir?.files?.map((file, index) => (
-                <ManagerItem key={index} item={file} type={'file'} />
+                <ManagerItem
+                    key={index}
+                    item={file}
+                    type={'file'}
+                    isShaking={isEditable}
+                />
             ))}
         </div>
     )

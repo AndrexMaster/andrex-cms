@@ -9,7 +9,7 @@ Route::prefix('file-manager')->group(function () {
     Route::get('/', [ApiDirController::class, 'index'])->name('file-manager.index');
     Route::post('/', [ApiDirController::class, 'create'])->name('file-manager.create');
     Route::get('/{id}', [ApiDirController::class, 'show'])->name('file-manager.show');
-    Route::put('/{id}', [ApiDirController::class, 'update'])->name('file-manager.update');
+    Route::put('/{directory}', [ApiDirController::class, 'update'])->name('file-manager.update');
     Route::delete('/', [ApiDirController::class, 'destroy'])->name('file-manager.destroy');
 
     Route::prefix('file')->group(function () {
@@ -21,5 +21,4 @@ Route::prefix('file-manager')->group(function () {
 
     Route::get('/breadcrumbs/{currentDirId}', [ApiDirController::class, 'showBreadcrumbs'])
         ->name('file-manager.showBreadcrumbs');
-
 });

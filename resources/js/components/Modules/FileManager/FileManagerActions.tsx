@@ -1,15 +1,26 @@
-import { AddImage } from '@components/Image';
 import { FileUpload } from '@components/Fields';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
-import { useEffect } from 'react';
-import { createFileManagerDirectory, fetchFileManagerDirectory } from '@store/thunks/Modules';
 import { AButton } from '@components/Buttons';
-import { handleMakeDirPopUp } from '@store/slices/Modules/fileManagerSlice';
-import { Plus } from 'lucide-react';
+import { handleMakeDirPopUp, handleSelectable } from '@store/slices/Modules/fileManagerSlice';
+import { Plus, SendToBack, Settings, SquareStack, Trash2 } from 'lucide-react';
+import { Divider } from '@components/common';
+import { useMemo } from 'react';
 
 export const FileManagerActions = () => {
     const dispatch = useAppDispatch()
-    const { tree, currentDir, loading, error } = useAppSelector(state => state.fileManager);
+    const { currentDir } = useAppSelector(state => state.fileManager);
+
+    const selected = useMemo(() => {
+        let selected = []
+
+        currentDir?.children.map((children) => {
+            if (children?.isSelected) {
+                selected.push(children);
+            }
+        })
+
+        return selected
+    }, [currentDir]);
 
     const handleUploadFile = (files: File[]) => {
         console.log('handleUploadFile', files);
@@ -26,7 +37,27 @@ export const FileManagerActions = () => {
     return (
         <div className={'flex gap-4'}>
             <AButton onClick={createDir} title={'Create dir'} startIcon={<Plus size={18}/>} >Create</AButton>
+            <AButton
+                onClick={() => dispatch(handleSelectable())}
+                title={'Create dir'}
+                startIcon={<SquareStack size={18}/>}
+            >
+                Select
+            </AButton>
             <FileUpload handleUploadFile={handleUploadFile}/>
+            {selected?.length === 1 && (
+                <>
+                    <Divider orientation={'vertical'} />
+                    <AButton onClick={createDir} color={'warning'} title={'Create dir'} startIcon={<Settings size={18}/>} >Edit</AButton>
+                </>
+            )}
+            {selected?.length > 0 && (
+                <>
+                    <Divider orientation={'vertical'} />
+                    <AButton onClick={createDir} color={'warning'} title={'Create dir'} startIcon={<SendToBack size={18}/>} >Move</AButton>
+                    <AButton onClick={createDir} color={'error'} title={'Create dir'} startIcon={<Trash2 size={18}/>} >Delete</AButton>
+                </>
+            )}
         </div>
     )
 }

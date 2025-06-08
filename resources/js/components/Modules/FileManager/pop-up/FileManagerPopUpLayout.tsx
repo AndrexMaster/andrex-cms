@@ -1,13 +1,12 @@
-import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { JSX, ReactNode } from 'react';
 import { X } from 'lucide-react';
-import { handleMakeDirPopUp } from '@store/slices/Modules/fileManagerSlice';
 
 interface PopUpLayoutProps {
     heading: string;
     variant?: 'info' | 'success' | 'action'
     children: ReactNode | JSX,
     isPopUpOpen?: boolean,
+    closeHandler: () => void,
 }
 
 export const FileManagerPopUpLayout = (props: PopUpLayoutProps) => {
@@ -16,12 +15,8 @@ export const FileManagerPopUpLayout = (props: PopUpLayoutProps) => {
         type = 'action',
         children,
         isPopUpOpen = false,
+        closeHandler,
     } = props;
-
-    const dispatch = useAppDispatch()
-    const close = () => {
-        dispatch(handleMakeDirPopUp(false))
-    }
 
     return (
         <div className={`
@@ -30,14 +25,13 @@ export const FileManagerPopUpLayout = (props: PopUpLayoutProps) => {
                 flex flex-col
                 duration-300
                 ${isPopUpOpen ? 'visible opacity-100' : 'invisible opacity-0'}
-
             `}
         >
             <div
                 className={'flex justify-between w-full p-4'}
             >
                 <span>{heading}</span>
-                <X className={'cursor-pointer'} onClick={close} size={32}/>
+                <X className={'cursor-pointer'} onClick={closeHandler} size={32}/>
             </div>
             <hr className={'border-stone-700'}/>
             <div className={'flex flex-1 px-4 py-6'}>

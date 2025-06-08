@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { FileManagerDir } from '@types/Modules/file-manager';
+import { FileManagerDir, FileManagerFile } from '@types/Modules/file-manager';
 import { nanoid } from 'nanoid';
 
 /*
@@ -69,12 +69,16 @@ export const createFileManagerDirectory = createAsyncThunk<
     }
 );
 
-export const updateFileManagerDirectory = createAsyncThunk(
-    'fileManager/uploadFile',
-    async (directoryId: string | null = null, { rejectWithValue }) => {
+export const updateFileManagerDirectory = createAsyncThunk<
+    FileManagerDir,
+    FileManagerDir,
+    { rejectValue: string }
+>(
+    'fileManager/updateDirectory',
+    async (directoryToUpdate: FileManagerDir, { rejectWithValue }) => {
         try {
-            const url = directoryId ? `/api/v1/admin/file-manager/${directoryId}` : '/api/file-manager/';
-            const response = await axios.get(url);
+            const url = `/api/v1/admin/file-manager/${directoryToUpdate.id}`;
+            const response = await axios.put<FileManagerDir>(url, directoryToUpdate);
             return response.data;
         } catch (error: any) {
             return rejectWithValue(error.response?.data?.message || error.message || 'Ошибка загрузки');
@@ -86,6 +90,18 @@ export const updateFileManagerDirectory = createAsyncThunk(
 * Files
 * */
 
+export const updateFileManagerFile = createAsyncThunk(
+    'fileManager/updateFile',
+    async (file: FileManagerFile, { rejectWithValue }) => {
+        try {
+            const url = `/api/v1/admin/file-manager/file/${file.id}`;
+            const response = await axios.put(url);
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || error.message || 'Ошибка загрузки');
+        }
+    }
+);
 
 /*
 * Breadcrumbs
