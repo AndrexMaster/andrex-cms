@@ -10,12 +10,12 @@ import {
 } from '@store/slices/Modules/fileManagerSlice';
 import { fetchFileManagerDirectory } from '@store/thunks/Modules';
 import log from 'eslint-plugin-react/lib/util/log';
+import { ContextMenu, ContextMenuItem, ContextMenuDivider  } from '@components/common/ContextMenu';
 
 interface ManagerItemProps extends Attributes {
     item: FileManagerDir | FileManagerFile;
     type: 'file' | 'directory';
     isShaking?: boolean;
-    editMode?: boolean;
     handleRemove?: () => void;
     handleUpdate?: () => void;
 }
@@ -62,8 +62,8 @@ export const ManagerItem = (props: ManagerItemProps) => {
         item,
         type,
         key,
+        //TODO: Возможно стоит анимацию дрожания когда елемент выбран
         isShaking = false,
-        editMode = false,
         handleRemove,
         handleUpdate,
     } = props;
@@ -83,13 +83,48 @@ export const ManagerItem = (props: ManagerItemProps) => {
         }
     }
 
-    const handleItemUpdate = () => {
-        dispatch(setNodeToUpdate(item))
-        dispatch(handleUpdateNodePopUpOpen(true))
-    }
+    const [contextMenu, setContextMenu] = useState<{
+        isOpen: boolean;
+        x: number;
+        y: number;
+        data: FileManagerDir | FileManagerFile | null;
+    }>({
+        isOpen: false,
+        x: 0,
+        y: 0,
+        data: null,
+    });
+
+    const handleContextMenu = (event: React.MouseEvent) => {
+        event.preventDefault();
+        event.stopPropagation();
+        setContextMenu({
+            isOpen: true,
+            x: event.clientX,
+            y: event.clientY,
+            data: item,
+        });
+    };
+
+    const handleCloseContextMenu = () => {
+        setContextMenu({ ...contextMenu, isOpen: false });
+    };
+
+    const handleAction = (action: string, itemData: FileManagerDir | FileManagerFile) => {
+        switch (action) {
+            case 'open':
+                handleItemClick()
+                break;
+            case 'update':
+                dispatch(setNodeToUpdate(item))
+                dispatch(handleUpdateNodePopUpOpen(true))
+                break;
+        }
+    };
 
     return (
         <div
+            onContextMenu={handleContextMenu}
             className={`
                 flex flex-col rounded-sm justify-center w-[100px] text-center items-center gap-2
                 p-2 border-red-100 hover:bg-white/10 cursor-pointer
@@ -100,18 +135,12 @@ export const ManagerItem = (props: ManagerItemProps) => {
             onMouseEnter={() => setIsMouseEnter(true)}
             onMouseLeave={() => setIsMouseEnter(false)}
         >
-            {isSelectable ? (
+            {isSelectable && (
                 <div
                     className={'absolute top-0 right-0'}
                 >
                     {item?.isSelected ? <SquareCheck size={'14px'}/> : <Square size={'14px'} />}
                 </div>
-            ) : isMouseEnter && (
-                <Settings
-                    className={'absolute top-0 right-0 hover:text-gray-400 transition'}
-                    size={24}
-                    onClick={handleItemUpdate}
-                />
             )}
             <div
                 className={'flex flex-col rounded-sm justify-center w-[100px] text-center items-center gap-2'}
@@ -122,6 +151,27 @@ export const ManagerItem = (props: ManagerItemProps) => {
                 </div>
                 <span className={'flex-1 line-clamp-2'}>{item?.name ?? ''}</span>
             </div>
+            <ContextMenu
+                isOpen={contextMenu.isOpen}
+                x={contextMenu.x}
+                y={contextMenu.y}
+                data={contextMenu.data}
+                onClose={handleCloseContextMenu}
+                onAction={handleAction}
+            >
+                <ContextMenuItem data-action="open">Открыть</ContextMenuItem>
+                <ContextMenuItem data-action="update">Изменить</ContextMenuItem>
+                <ContextMenuItem data-action="delete" data-hover-color={'sky/100'}>Удалить</ContextMenuItem>
+                {contextMenu.data && (contextMenu.data as FileManagerDir).children ? (
+                    null
+                    // <ContextMenuItem data-action="create-new-folder">Создать папку</ContextMenuItem>
+                ) : (
+                    <>
+                        <ContextMenuDivider />
+                        <ContextMenuItem data-action="download">Скачать</ContextMenuItem>
+                    </>
+                )}
+            </ContextMenu>
         </div>
     );
 };

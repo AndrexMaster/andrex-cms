@@ -15,7 +15,6 @@ export default function FileManager(props) {
     const { breadcrumbs, nodeToUpdate } = useAppSelector(state => state.fileManager);
     const dispatch = useAppDispatch();
 
-    //TODO: Обновление директории (название)
     //TODO: Перенос директории (Путь к ней (Drag & Drop? | Выпадающий список | попап с grid папками?))
     //TODO: Удаление директории
 

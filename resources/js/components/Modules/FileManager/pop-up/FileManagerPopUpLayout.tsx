@@ -1,4 +1,4 @@
-import { JSX, ReactNode } from 'react';
+import { JSX, ReactNode, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 
 interface PopUpLayoutProps {
@@ -17,15 +17,32 @@ export const FileManagerPopUpLayout = (props: PopUpLayoutProps) => {
         isPopUpOpen = false,
         closeHandler,
     } = props;
+    const popupRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
+                closeHandler();
+            }
+        };
+
+        if (isPopUpOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+    }, [isPopUpOpen]);
 
     return (
-        <div className={`
+        <div
+            ref={popupRef}
+            className={`
                 absolute h-fit w-fit left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]
                 bg-stone-700/10 backdrop-blur-sm rounded-md
                 flex flex-col
                 duration-300
+                border border-[#555]
                 ${isPopUpOpen ? 'visible opacity-100' : 'invisible opacity-0'}
             `}
+            click
         >
             <div
                 className={'flex justify-between w-full p-4'}

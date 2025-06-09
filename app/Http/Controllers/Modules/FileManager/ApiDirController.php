@@ -108,7 +108,6 @@ class ApiDirController
      * @return JsonResponse
      */
 
-    //TODO: Узнать за Route Model Binding
     public function update(Request $request, FileManagerDirectory $directory): JsonResponse
     {
 
