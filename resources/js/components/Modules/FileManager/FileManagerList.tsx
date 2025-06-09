@@ -2,7 +2,13 @@ import { FileManagerDir, FileManagerFile } from '@types/Modules/file-manager';
 import { ManagerItem } from '@components/Modules/FileManager';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { useEffect, useState } from 'react';
-import { handleMakeDirPopUp, setBreadcrumbs, setCurrentDir } from '@store/slices/Modules/fileManagerSlice';
+import {
+    clearSelection,
+    handleMakeDirPopUp,
+    handleSelectable,
+    setBreadcrumbs,
+    setCurrentDir
+} from '@store/slices/Modules/fileManagerSlice';
 import { ContextMenu, ContextMenuDivider, ContextMenuItem } from '@components/common/ContextMenu';
 
 interface FileManagerListProps {
@@ -16,7 +22,13 @@ export const FileManagerList = (props: FileManagerListProps) => {
 
     const dispatch = useAppDispatch()
     const currentDir: FileManagerDir = useAppSelector((state) => state.fileManager.currentDir);
-    const isEditable: boolean = useAppSelector((state) => state.fileManager.isEditable);
+    const {
+        isEditable,
+        isSelectable
+    } : {
+        isEditable: boolean,
+        isSelectable: boolean
+    } = useAppSelector((state) => state.fileManager);
 
     useEffect(() => {
         dispatch(setBreadcrumbs([]));
@@ -43,6 +55,10 @@ export const FileManagerList = (props: FileManagerListProps) => {
             y: event.clientY,
             data: null,
         });
+        if (isSelectable) {
+            dispatch(handleSelectable())
+            dispatch(clearSelection())
+        }
     };
 
     const handleCloseContextMenu = () => {

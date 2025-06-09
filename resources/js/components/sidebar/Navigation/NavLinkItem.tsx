@@ -1,8 +1,9 @@
 import { BreadcrumbItem } from '@types/index';
 import { Link } from '@inertiajs/react';
 import { UseAppropriateIcon } from '@hooks/use-appropriate-icon';
+import { Attributes } from 'react';
 
-interface NavLinkItemProps {
+interface NavLinkItemProps extends Attributes {
     link: BreadcrumbItem
     active?: boolean
 }
@@ -16,6 +17,7 @@ export const NavLinkItem = (props: NavLinkItemProps) => {
     return (
         <div>
             <Link
+                key={link.title}
                 href={link.href}
                 className={'flex gap-2 items-center border-b-1 border-gray-100 p-1 cursor-pointer w-[100%] transition hover:border-gray-500'}
             >

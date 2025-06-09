@@ -69,6 +69,36 @@ export const createFileManagerDirectory = createAsyncThunk<
     }
 );
 
+export const deleteFileManagerNode = createAsyncThunk<
+    FileManagerDir | FileManagerFile,
+    FileManagerDir | FileManagerFile,
+    { rejectValue: string }
+>(
+    'fileManager/deleteNode',
+    async (nodeToDelete: ((FileManagerDir | FileManagerFile) | (FileManagerDir | FileManagerFile)[]), { rejectWithValue }) => {
+        try {
+            let url = '/api/v1/admin/file-manager/'
+            let response;
+
+            if (!Array.isArray(nodeToDelete)) {
+                url += `${nodeToDelete.id}`;
+                response = await axios.delete<any>(url);
+            } else {
+                response = await axios.delete<any>(url, {
+                    data: {
+                        ids: nodeToDelete.map(node => {
+                            return node.id;
+                        })
+                    },
+                });
+            }
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || error.message || 'Ошибка загрузки');
+        }
+    }
+);
+
 export const updateFileManagerDirectory = createAsyncThunk<
     FileManagerDir,
     FileManagerDir,

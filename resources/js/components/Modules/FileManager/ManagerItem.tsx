@@ -3,16 +3,18 @@ import { Attributes, useState } from 'react';
 import { Folder, File, Square, SquareCheck, Settings } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import {
+    clearSelection,
+    handleDeleteNodePopUpOpen, handleSelectable,
     handleUpdateNodePopUpOpen,
     selectNode,
     setCurrentDir,
-    setFileManagerTree, setNodeToUpdate
+    setFileManagerTree, setNodeToDelete, setNodeToUpdate
 } from '@store/slices/Modules/fileManagerSlice';
 import { fetchFileManagerDirectory } from '@store/thunks/Modules';
 import log from 'eslint-plugin-react/lib/util/log';
 import { ContextMenu, ContextMenuItem, ContextMenuDivider  } from '@components/common/ContextMenu';
 
-interface ManagerItemProps extends Attributes {
+interface ManagerItemProps extends Attributes{
     item: FileManagerDir | FileManagerFile;
     type: 'file' | 'directory';
     isShaking?: boolean;
@@ -61,7 +63,6 @@ export const ManagerItem = (props: ManagerItemProps) => {
     const {
         item,
         type,
-        key,
         //TODO: Возможно стоит анимацию дрожания когда елемент выбран
         isShaking = false,
         handleRemove,
@@ -104,6 +105,10 @@ export const ManagerItem = (props: ManagerItemProps) => {
             y: event.clientY,
             data: item,
         });
+        if (isSelectable) {
+            dispatch(handleSelectable())
+            dispatch(clearSelection())
+        }
     };
 
     const handleCloseContextMenu = () => {
@@ -119,11 +124,15 @@ export const ManagerItem = (props: ManagerItemProps) => {
                 dispatch(setNodeToUpdate(item))
                 dispatch(handleUpdateNodePopUpOpen(true))
                 break;
+            case 'delete':
+                dispatch(setNodeToDelete(item))
+                dispatch(handleDeleteNodePopUpOpen(true))
         }
     };
 
     return (
         <div
+            key={item.id}
             onContextMenu={handleContextMenu}
             className={`
                 flex flex-col rounded-sm justify-center w-[100px] text-center items-center gap-2
@@ -131,7 +140,7 @@ export const ManagerItem = (props: ManagerItemProps) => {
                 relative
             `}
             title={item?.name ?? ''}
-            draggable={true}
+            draggable={!isSelectable}
             onMouseEnter={() => setIsMouseEnter(true)}
             onMouseLeave={() => setIsMouseEnter(false)}
         >

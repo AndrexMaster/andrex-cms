@@ -20,6 +20,10 @@ export const FileManagerPopUpLayout = (props: PopUpLayoutProps) => {
     const popupRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
+        console.log('closeHandler', closeHandler);
+    }, [closeHandler]);
+
+    useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
                 closeHandler();
@@ -35,7 +39,7 @@ export const FileManagerPopUpLayout = (props: PopUpLayoutProps) => {
         <div
             ref={popupRef}
             className={`
-                absolute h-fit w-fit left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]
+                absolute h-fit w-fit min-w-80 left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%]
                 bg-stone-700/10 backdrop-blur-sm rounded-md
                 flex flex-col
                 duration-300
@@ -45,7 +49,7 @@ export const FileManagerPopUpLayout = (props: PopUpLayoutProps) => {
             click
         >
             <div
-                className={'flex justify-between w-full p-4'}
+                className={'flex justify-between items-center w-full p-4'}
             >
                 <span>{heading}</span>
                 <X className={'cursor-pointer'} onClick={closeHandler} size={32}/>

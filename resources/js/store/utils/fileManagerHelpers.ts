@@ -63,14 +63,8 @@ export const updateDirectoryInCurrent = (
     useTempId: boolean = true
 ): FileManagerDir[] => {
     return currentChildren.children.map(dir => {
-        console.log(`isDirectory(dir) ${dir.name} `, isDirectory(dir));
         if (isDirectory(dir)) {
             const matchesId = useTempId ? (dir?.tempId === idToFind) : (dir.id === idToFind);
-            console.log('useTempId', useTempId);
-            console.log('dir', current(dir));
-            console.log('idToFind', idToFind);
-            console.log('matchesId ===', matchesId);
-            console.log('updatedDirData', updatedDirData);
 
             if (matchesId) {
                 return {
@@ -97,38 +91,15 @@ export const updateDirectoryInCurrent = (
 
 /**
  * Удаляет директорию из древа.
- * @param currentChildren Дети текущей директории.
- * @param idToRemove ID (tempId или реальный) директории, которую нужно удалить.
- * @param useTempId Использовать ли tempId для поиска.
+ * @param currentDirArray Дети текущей директории.
+ * @param idsToRemove ID директорий или файлов, которые нужно удалить.
  * @returns Новое древо без удаленной директории.
  */
-export const removeDirectoryFromCurrent = (
-    currentChildren: FileManagerDir,
-    idToRemove: string,
-    useTempId: boolean = true
-): FileManagerDir[] => {
-    const filteredItems = currentChildren.children.filter(item => {
-        const targetId = useTempId ? item.tempId : item.id;
-        return targetId !== idToRemove;
-    });
-
-    return filteredItems.map(item => {
-        if (isDirectory(item)) {
-            const updatedChildren = removeDirectoryFromCurrent(
-                item as FileManagerDir,
-                idToRemove,
-                useTempId
-            );
-
-            if (updatedChildren !== item.children) {
-                return {
-                    ...item,
-                    children: updatedChildren as FileManagerDir[]
-                };
-            }
-        }
-        return item;
-    });
+export const removeNodeFromArr = (
+    currentDirArray: FileManagerDir[] | FileManagerFile[],
+    idsToRemove: string[],
+): FileManagerDir[] | FileManagerFile[] => {
+    return currentDirArray.filter(item => !idsToRemove.includes(item.id));
 };
 
 
@@ -138,8 +109,6 @@ export const removeDirectoryFromCurrent = (
  * @param idToFind ID (tempId или реальный) директории, которую нужно удалить.
  * @returns FileManagerDir[]
  */
-
-
 export  const handleNodeSelectionHelper = (
     currentChildren: (FileManagerDir | FileManagerFile)[],
     idToFind: string
@@ -153,5 +122,22 @@ export  const handleNodeSelectionHelper = (
         }
 
         return item
+    })
+}
+
+/**
+ * Зеркалит значение isSelected если оно существует. В противном случае делает его true
+ * @param currentChildren Дети текущей директории.
+ * @param idToFind ID (tempId или реальный) директории, которую нужно удалить.
+ * @returns FileManagerDir[]
+ */
+export  const handleNodeUnelectionHelper = (
+    currentChildren: (FileManagerDir | FileManagerFile)[],
+) => {
+    return currentChildren.map(item => {
+        return {
+            ...item,
+            isSelected: false
+        }
     })
 }

@@ -22,7 +22,7 @@ export const NavLinks = (props: NavLinksProps) => {
         >
             {links.map((link, index) => {
                 return (
-                    <NavLinkItem link={link}/>
+                    <NavLinkItem key={index} link={link}/>
                 )
             })}
         </div>

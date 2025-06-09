@@ -1,4 +1,4 @@
-import { JSX, ReactNode } from 'react';
+import { JSX, ReactNode, useEffect } from 'react';
 import { PageIcon } from '@components/';
 import AdminSidebarLayout from '@layouts/admin/admin-sidebar-layout';
 import { getPageTitle } from '@hooks/use-breadcrumbs';
@@ -54,12 +54,14 @@ export const AdminContentLayout = (props: AdminContentLayoutInterface) => {
                     <div className={'flex items-center gap-2'}>
                         <PageIcon/>
                         <span
-                            onClick={() => customBreadcrumbHeadingAction ?
-                                    customBreadcrumbHeadingAction(breadcrumbs?.length > 0 ? breadcrumbs[0]['id'] : null)
+                            onClick={() => {
+                                customBreadcrumbHeadingAction && breadcrumbs?.length > 1 ?
+                                    customBreadcrumbHeadingAction(breadcrumbs[0]['id'])
                                 :
-                                    null
+                                    null;
                             }
-                            className={customBreadcrumbHeadingAction ? 'cursor-pointer hover:underline' : ''}
+                            }
+                            className={(customBreadcrumbHeadingAction && breadcrumbs?.length > 1) ? 'cursor-pointer hover:underline' : ''}
                         >
                             {getPageTitle()}
                         </span>

@@ -22,7 +22,6 @@ export const MakeDirPopUp = () => {
 
     useEffect(() => {
         setFolderName('')
-        console.log('isPopUpOpen', isPopUpOpen);
     }, [isPopUpOpen]);
 
     const closePopUp = () => {
@@ -40,7 +39,7 @@ export const MakeDirPopUp = () => {
                   placeholder={'Folder name...'}
                   title={'Folder name'}
                   onChange={setFolderName}
-                  defaultValue={folderName}
+                  value={folderName}
               />
               <AButton
                   onClick={makeDir}

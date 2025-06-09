@@ -1,22 +1,20 @@
 import { AppLayout } from '@layouts/app';
 import { AdminContentLayout } from '@layouts/admin';
 import { FileManagerList, FileManagerActions } from '@components/Modules/FileManager';
-import { MakeDirPopUp } from '@components/Modules/FileManager/pop-up';
+import { MakeDirPopUp, SubmitDeleteActionPopUp, UpdateNodePopUp } from '@components/Modules/FileManager/pop-up';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
-import { fetchFileManagerDirectory, getBreadcrumbs } from '@store/thunks/Modules';
-import { useEffect, useMemo } from 'react';
-import { UpdateDirPopUp } from '@components/Modules/FileManager/pop-up/UpdateDirPopUp';
+import { fetchFileManagerDirectory } from '@store/thunks/Modules';
+import { useEffect } from 'react';
 
 export default function FileManager(props) {
     const {
         directory: mainDirectory
     } = props
 
-    const { breadcrumbs, nodeToUpdate } = useAppSelector(state => state.fileManager);
+    const { breadcrumbs, nodeToUpdate, nodeToDelete, selectedNodes } = useAppSelector(state => state.fileManager);
     const dispatch = useAppDispatch();
 
     //TODO: Перенос директории (Путь к ней (Drag & Drop? | Выпадающий список | попап с grid папками?))
-    //TODO: Удаление директории
 
     //TODO: Добавление файла
     //TODO: Обновление информации файла
@@ -43,7 +41,10 @@ export default function FileManager(props) {
                 <FileManagerList mainDirectory={mainDirectory}/>
                 <MakeDirPopUp/>
                 {nodeToUpdate && (
-                    <UpdateDirPopUp/>
+                    <UpdateNodePopUp/>
+                )}
+                {(nodeToDelete || selectedNodes?.length > 0) && (
+                    <SubmitDeleteActionPopUp/>
                 )}
             </AdminContentLayout>
         </AppLayout>

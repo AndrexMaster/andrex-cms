@@ -8,7 +8,7 @@ import { FileManagerDir, FileManagerFile } from '@types/Modules/file-manager';
 import { Divider } from '@components/common';
 import { handleUpdateNodePopUpOpen } from '@store/slices/Modules/fileManagerSlice';
 
-export const UpdateDirPopUp = (props) => {
+export const UpdateNodePopUp = (props) => {
 
     const { isUpdateNodePopUpOpen, nodeToUpdate } : {
         isUpdateNodePopUpOpen: boolean,
@@ -61,18 +61,9 @@ export const UpdateDirPopUp = (props) => {
         }
     }, [isUpdateNodePopUpOpen, nodeToUpdate]);
 
-
-    useEffect(() => {
-        console.log('nodeName', nodeName);
-    }, [nodeName]);
-
     const closePopUp = () => {
         dispatch(handleUpdateNodePopUpOpen(false))
     }
-
-    useEffect(() => {
-        console.log(nodeName?.length <= 0 || nodeToUpdate.name === nodeName);
-    }, [nodeName, nodeToUpdate]);
 
 
     return (

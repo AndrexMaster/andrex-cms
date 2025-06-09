@@ -58,7 +58,7 @@ export const AButton = (props: ButtonInterface) => {
     }, [color]);
 
     const buttonClasses = useMemo(() => {
-        let classes = `flex items-center px-2 justify-center gap-1 rounded-md transition ${colorBasedStyle} ${getVariantBasedStyles}`;
+        let classes = `flex items-center px-2 justify-center gap-1 rounded-md transition hover:bg-white/10 ${colorBasedStyle} ${getVariantBasedStyles}`;
 
         if (children) {
             classes += ' py-1'

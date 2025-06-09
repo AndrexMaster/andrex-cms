@@ -25,7 +25,7 @@ return new class extends Migration
             $table->foreign('parent_id')
             ->references('id')
             ->on('file_manager_directories')
-            ->onDelete('set null');
+            ->onDelete('cascade');
         });
 
         DB::table('file_manager_directories')->insert([

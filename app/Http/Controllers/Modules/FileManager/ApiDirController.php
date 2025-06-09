@@ -185,22 +185,34 @@ class ApiDirController
      * @param  Request  $request
      * @return JsonResponse
      */
-    public function destroy(Request $request): JsonResponse
+    public function destroy(Request $request, FileManagerDirectory $directory): JsonResponse
     {
         try {
-            $validatedData = $request->validate([
-                'ids' => ['required', 'array'],
-                'ids.*' => ['uuid', 'exists:file_manager_directories,id'],
-            ]);
+            $directoryIds = [];
 
-            $directoryIds = $validatedData['ids'];
+            if ($request->has('ids')) {
+                $validatedData = $request->validate([
+                    'ids' => ['required', 'array'],
+                    'ids.*' => ['uuid', 'exists:file_manager_directories,id'],
+                ]);
 
-            $deletedCount = FileManagerDirectory::query()->whereIn('id', $directoryIds)->delete();
+                $directoryIds = $validatedData['ids'];
+            }
 
+            $deletedCount = 0;
+            $directoryId = '';
+
+            if (isset($directoryIds) && count($directoryIds) > 0) {
+                $deletedCount = FileManagerDirectory::query()->whereIn('id', $directoryIds)->delete();
+            } else if ($directory->id !== null) {
+                $directoryId = $directory->id;
+                FileManagerDirectory::query()->where('id', $directory->id)->delete();
+                $deletedCount = 1;
+            }
             return response()->json([
                 'message' => "Удалено {$deletedCount} директорий.",
-                'deleted_ids' => $directoryIds
-            ], 204);
+                'deleted_ids' => count($directoryIds) > 0 ? $directoryIds : [$directoryId],
+            ]);
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Ошибка валидации входящих данных.',
