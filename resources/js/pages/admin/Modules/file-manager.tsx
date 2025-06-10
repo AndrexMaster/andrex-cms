@@ -14,17 +14,17 @@ export default function FileManager(props) {
     const { breadcrumbs, nodeToUpdate, nodeToDelete, selectedNodes } = useAppSelector(state => state.fileManager);
     const dispatch = useAppDispatch();
 
-    //TODO: Перенос директории (Путь к ней (Drag & Drop? | Выпадающий список | попап с grid папками?))
+    //TODO: Move directory (Path to it (Drag & Drop? | Dropdown | Popup with grid folders?))
 
-    //TODO: Добавление файла
-    //TODO: Обновление информации файла
-    //TODO: Перенос файла (Путь к нему (Drag & Drop? | Выпадающий список | попап с grid папками?))
-    //TODO: Удаление файла
+    //TODO: Add file
+    //TODO: Update file info
+    //TODO: Move file (Path to it (Drag & Drop? | Dropdown | Popup with grid folders?))
+    //TODO: Delete file
 
-    //TODO: Сайдбар
-    //TODO: Навигация по стрелочкам (вернуться на уровень выше)
-    //TODO: ОЧЕНЬ НА БУДУЩЕЕ!! Высчитывать количество файлов которые вместит в себе текущее разрешение экрана.
-    //TODO: Пагинация
+    //TODO: Sidebar
+    //TODO: Arrow navigation (go up one level)
+    //TODO: WAY IN THE FUTURE!! Calculate number of files current screen resolution can fit.
+    //TODO: Pagination
 
     const customBreadcrumbAction = (breadcrumbId) => {
         dispatch(fetchFileManagerDirectory(breadcrumbId))
