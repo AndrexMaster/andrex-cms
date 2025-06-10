@@ -4,18 +4,16 @@ import {
     createFileManagerDirectory, deleteFileManagerNode,
     fetchFileManagerDirectory,
     getBreadcrumbs,
-    updateFileManagerDirectory
+    updateFileManagerDirectory, uploadFileManagerFile
 } from '@store/thunks/Modules';
 import {
     addDirectoryToCurrent,
     handleNodeSelectionHelper, handleNodeUnelectionHelper,
-    removeDirectoryFromCurrent, removeNodeFromArr,
+    removeNodeFromArr,
     updateDirectoryInCurrent
 } from '@store/utils';
 
 interface FileManagerState {
-    tree: FileManagerTree | null;
-
     currentDir: FileManagerDir | null;
     nodeToUpdate: FileManagerDir | FileManagerFile | null;
     nodeToDelete: FileManagerDir | FileManagerFile | null;
@@ -32,8 +30,6 @@ interface FileManagerState {
 }
 
 const initialState: FileManagerState = {
-    tree: null, // TODO: Не факт что нужно
-
     currentDir: null,
     nodeToUpdate: null,
     nodeToDelete: null,
@@ -87,11 +83,6 @@ const fileManagerSlice = createSlice({
                 children: handleNodeSelectionHelper(state.currentDir.children, action.payload),
                 files: handleNodeSelectionHelper(state.currentDir.files, action.payload)
             }
-        },
-
-        // Tree
-        updateTree: (state, action) => {
-            state.tree = action.payload
         },
 
         // Breadcrumbs
@@ -245,11 +236,21 @@ const fileManagerSlice = createSlice({
 
                 state.currentDir = {
                     ...state.currentDir,
-                    children: removeNodeFromArr(state.currentDir?.children, response.deleted_ids) as FileManagerDir[],
-                    files: removeNodeFromArr(state.currentDir?.files, response.deleted_ids) as FileManagerFile[],
+                    children: removeNodeFromArr(state.currentDir?.children, response?.deleted_ids) as FileManagerDir[],
+                    files: removeNodeFromArr(state.currentDir?.files, response?.deleted_ids) as FileManagerFile[],
                 }
 
                 state.isDeleteNodePopUpOpen = false
+            })
+
+            /**
+             *
+             * FILES
+             * Uploading
+             *
+             * */
+            .addCase(uploadFileManagerFile.pending, (state: FileManagerState, action) => {
+                console.log('action.payload', action.payload);
             })
 
 

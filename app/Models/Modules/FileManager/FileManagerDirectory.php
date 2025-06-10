@@ -5,7 +5,7 @@ namespace App\Models\Modules\FileManager;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Str; // Для генерации UUID
+use Illuminate\Support\Str;
 
 class FileManagerDirectory extends Model
 {
@@ -14,6 +14,7 @@ class FileManagerDirectory extends Model
     protected $fillable = [
         'name',
         'parent_id',
+        'path',
     ];
 
     public $incrementing = false;

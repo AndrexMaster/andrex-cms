@@ -20,10 +20,6 @@ export const FileManagerPopUpLayout = (props: PopUpLayoutProps) => {
     const popupRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        console.log('closeHandler', closeHandler);
-    }, [closeHandler]);
-
-    useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (popupRef.current && !popupRef.current.contains(event.target as Node)) {
                 closeHandler();

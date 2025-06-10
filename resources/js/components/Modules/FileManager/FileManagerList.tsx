@@ -1,7 +1,7 @@
 import { FileManagerDir, FileManagerFile } from '@types/Modules/file-manager';
 import { ManagerItem } from '@components/Modules/FileManager';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
     clearSelection,
     handleMakeDirPopUp,
@@ -10,6 +10,8 @@ import {
     setCurrentDir
 } from '@store/slices/Modules/fileManagerSlice';
 import { ContextMenu, ContextMenuDivider, ContextMenuItem } from '@components/common/ContextMenu';
+import { ContextFileUpload } from '@components/common/ContextMenu/ContextFileUpload';
+import { uploadFileManagerFile } from '@store/thunks/Modules';
 
 interface FileManagerListProps {
     mainDirectory: FileManagerDir;
@@ -30,10 +32,7 @@ export const FileManagerList = (props: FileManagerListProps) => {
         isSelectable: boolean
     } = useAppSelector((state) => state.fileManager);
 
-    useEffect(() => {
-        dispatch(setBreadcrumbs([]));
-        dispatch(setCurrentDir(mainDirectory))
-    }, [dispatch]);
+    const fileInputRef = useRef<HTMLInputElement | null>(null)
 
     const [contextMenu, setContextMenu] = useState<{
         isOpen: boolean;
@@ -66,10 +65,28 @@ export const FileManagerList = (props: FileManagerListProps) => {
     };
 
     const handleAction = (action: string) => {
-        if (action === 'create-new-folder') {
-            dispatch(handleMakeDirPopUp())
+        switch (action) {
+            case 'create-new-folder':
+                dispatch(handleMakeDirPopUp())
+                break;
+            case 'upload-file':
+                if (fileInputRef.current) {
+                    fileInputRef.current.click();
+                }
+                break;
         }
     };
+
+    const handleUploadFile = (files: File[]) => {
+        if (files.length > 1) {
+            dispatch(uploadFileManagerFile({ files: files, directoryId: currentDir.id }));
+        }
+    }
+
+    useEffect(() => {
+        dispatch(setBreadcrumbs([]));
+        dispatch(setCurrentDir(mainDirectory))
+    }, [dispatch]);
 
     return (
         <div
@@ -103,7 +120,19 @@ export const FileManagerList = (props: FileManagerListProps) => {
                 onAction={handleAction}
             >
                 <ContextMenuItem data-action="create-new-folder">Создать папку</ContextMenuItem>
+                <ContextMenuItem
+                    data-action="upload-file"
+                    fileInputRef={fileInputRef}
+                    handleUploadFile={handleUploadFile}
+                    variant={'file-loader'}
+
+                >
+                    Загрузить файл
+                </ContextMenuItem>
             </ContextMenu>
+            {fileInputRef && handleUploadFile && (
+                <ContextFileUpload fileInputRef={fileInputRef} handleUploadFile={handleUploadFile}/>
+            )}
         </div>
     )
 }

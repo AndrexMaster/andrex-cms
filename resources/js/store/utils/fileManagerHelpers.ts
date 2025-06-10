@@ -1,4 +1,4 @@
-import { FileManagerDir, FileManagerFile, FileManagerTree } from '@types/Modules/file-manager';
+import { FileManagerDir, FileManagerFile } from '@types/Modules/file-manager';
 import { current } from '@reduxjs/toolkit';
 
 function isDirectory(item: FileManagerDir | FileManagerFile): item is FileManagerDir {
@@ -6,25 +6,20 @@ function isDirectory(item: FileManagerDir | FileManagerFile): item is FileManage
 }
 
 /**
- * Добавляет новую директорию в древо.
- * @param currentChildren Дети текущей директории.
- * @param newDir Объект новой директории.
- * @param parentId ID родительской директории (null для корневых).
- * @returns Новое новый currentDir с добавленной директорией.
+ * Adds a new directory to the tree.
+ * @param currentChildren The children of the current directory.
+ * @param newDir The new directory object.
+ * @param parentId The ID of the parent directory (null for root directories).
+ * @returns A new currentDir with the added directory.
  */
 export const addDirectoryToCurrent = (
     currentChildren: FileManagerDir,
     newDir: FileManagerDir,
     parentId: string | null
 ): FileManagerDir[] => {
-    if (parentId === null) {
-        return [...currentChildren, newDir];
-    }
-
     if (currentChildren.id === parentId) {
-        return [...currentChildren.children, newDir]
+        return [...currentChildren.children, newDir];
     }
-
     return currentChildren.children.map(item => {
         if (isDirectory(item)) {
             if (item.id === parentId) {
@@ -38,7 +33,7 @@ export const addDirectoryToCurrent = (
                 if (updatedChildren !== item.children) {
                     return {
                         ...item,
-                        children: updatedChildren as FileManagerDir[] // <--- Приведение типа
+                        children: updatedChildren as FileManagerDir[]
                     };
                 }
             }
@@ -48,13 +43,13 @@ export const addDirectoryToCurrent = (
 };
 
 /**
- * Обновляет директорию в древе (например, заменяет оптимистичную на реальную).
- * Оптимистичная директория это папка добавленная в ui до получения подтверждения
- * @param currentChildren Дети текущей директории.
- * @param idToFind ID (tempId или реальный) директории, которую нужно найти.
- * @param updatedDirData Новые данные директории.
- * @param useTempId Использовать ли tempId для поиска.
- * @returns Новое древо с обновленной директорией.
+ * Updates a directory in the tree (e.g., replaces an optimistic one with real data).
+ * An optimistic directory is a folder added to the UI before receiving backend confirmation.
+ * @param currentChildren The children of the current directory.
+ * @param idToFind The ID (tempId or real ID) of the directory to find.
+ * @param updatedDirData The new directory data.
+ * @param useTempId Whether to use tempId for searching.
+ * @returns The new tree with the updated directory.
  */
 export const updateDirectoryInCurrent = (
     currentChildren: FileManagerDir,
@@ -75,12 +70,12 @@ export const updateDirectoryInCurrent = (
                     files: updatedDirData.files || dir.files,
                 };
             } else if (dir.children && dir.children.length > 0) {
-                const updatedChildren = updateDirectoryInCurrent(dir, idToFind, updatedDirData, useTempId)
+                const updatedChildren = updateDirectoryInCurrent(dir, idToFind, updatedDirData, useTempId);
 
                 if (updatedChildren !== dir.children) {
                     return {
                         ...dir,
-                        children: updatedChildren as FileManagerDir[] // <--- Приведение типа
+                        children: updatedChildren as FileManagerDir[]
                     };
                 }
             }
@@ -90,10 +85,10 @@ export const updateDirectoryInCurrent = (
 };
 
 /**
- * Удаляет директорию из древа.
- * @param currentDirArray Дети текущей директории.
- * @param idsToRemove ID директорий или файлов, которые нужно удалить.
- * @returns Новое древо без удаленной директории.
+ * Removes a directory or file from an array of nodes.
+ * @param currentDirArray The current array of directories or files.
+ * @param idsToRemove IDs of directories or files to remove.
+ * @returns A new array without the removed nodes.
  */
 export const removeNodeFromArr = (
     currentDirArray: FileManagerDir[] | FileManagerFile[],
@@ -104,10 +99,10 @@ export const removeNodeFromArr = (
 
 
 /**
- * Зеркалит значение isSelected если оно существует. В противном случае делает его true
- * @param currentChildren Дети текущей директории.
- * @param idToFind ID (tempId или реальный) директории, которую нужно удалить.
- * @returns FileManagerDir[]
+ * Toggles the 'isSelected' value if it exists. Otherwise, sets it to true.
+ * @param currentChildren The children of the current directory.
+ * @param idToFind The ID (tempId or real ID) of the node to select/deselect.
+ * @returns An array of FileManagerDir or FileManagerFile with updated selection.
  */
 export  const handleNodeSelectionHelper = (
     currentChildren: (FileManagerDir | FileManagerFile)[],
@@ -117,7 +112,7 @@ export  const handleNodeSelectionHelper = (
         if (item.id === idToFind) {
             return {
                 ...item,
-                isSelected: item.isSelected !== undefined ? !item.isSelected : idToFind === item.id
+                isSelected: item.isSelected !== undefined ? !item.isSelected : true
             }
         }
 
@@ -126,10 +121,9 @@ export  const handleNodeSelectionHelper = (
 }
 
 /**
- * Зеркалит значение isSelected если оно существует. В противном случае делает его true
- * @param currentChildren Дети текущей директории.
- * @param idToFind ID (tempId или реальный) директории, которую нужно удалить.
- * @returns FileManagerDir[]
+ * Sets the 'isSelected' value to false for all items.
+ * @param currentChildren The children of the current directory.
+ * @returns An array of FileManagerDir or FileManagerFile with all items unselected.
  */
 export  const handleNodeUnelectionHelper = (
     currentChildren: (FileManagerDir | FileManagerFile)[],

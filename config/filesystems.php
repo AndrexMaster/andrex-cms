@@ -43,6 +43,7 @@ return [
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
+            'root_path' => 'file_manager/',
             'throw' => false,
             'report' => false,
         ],
