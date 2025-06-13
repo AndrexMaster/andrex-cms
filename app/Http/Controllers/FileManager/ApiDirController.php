@@ -1,16 +1,16 @@
 <?php
 
-namespace App\Http\Controllers\Modules\FileManager;
+namespace App\Http\Controllers\FileManager;
 
-use App\Models\Modules\FileManager\FileManagerDirectory;
+use App\Models\FileManager\FileManagerDirectory;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Support\Facades\Log;
 
 class ApiDirController
 {

@@ -1,11 +1,11 @@
 import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
-import { FileManagerDir, FileManagerFile, FileManagerTree } from '@types/Modules/file-manager';
+import { FileManagerDir, FileManagerFile, FileManagerTree } from '@types/file-manager';
 import {
     createFileManagerDirectory, deleteFileManagerNode,
     fetchFileManagerDirectory,
     getBreadcrumbs,
     updateFileManagerDirectory, uploadFileManagerFile
-} from '@store/thunks/Modules';
+} from '@store/thunks';
 import {
     addDirectoryToCurrent,
     handleNodeSelectionHelper, handleNodeUnelectionHelper,

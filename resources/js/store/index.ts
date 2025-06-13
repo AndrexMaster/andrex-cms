@@ -1,6 +1,6 @@
 import { configureStore } from '@reduxjs/toolkit';
 import productReducer from './slices/productSlice';
-import fileManagerReducer from './slices/Modules/fileManagerSlice';
+import fileManagerReducer from './slices/fileManagerSlice';
 
 export const store = configureStore({
     reducer: {

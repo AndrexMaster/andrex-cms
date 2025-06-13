@@ -1,4 +1,4 @@
-import { FileManagerDir, FileManagerFile } from '@types/Modules/file-manager';
+import { FileManagerDir, FileManagerFile } from '@types/file-manager';
 import { current } from '@reduxjs/toolkit';
 
 function isDirectory(item: FileManagerDir | FileManagerFile): item is FileManagerDir {

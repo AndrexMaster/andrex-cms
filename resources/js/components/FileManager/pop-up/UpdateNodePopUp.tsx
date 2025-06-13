@@ -1,12 +1,12 @@
 import { TextField } from '@components/Fields';
-import { FileManagerPopUpLayout } from '@components/Modules/FileManager/pop-up';
+import { FileManagerPopUpLayout } from '@components/FileManager/pop-up/index';
 import { AButton } from '@components/Buttons';
 import { useEffect, useMemo, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
-import { updateFileManagerDirectory, updateFileManagerFile } from '@store/thunks/Modules';
-import { FileManagerDir, FileManagerFile } from '@types/Modules/file-manager';
+import { updateFileManagerDirectory, updateFileManagerFile } from '@store/thunks';
+import { FileManagerDir, FileManagerFile } from '@types/file-manager';
 import { Divider } from '@components/common';
-import { handleUpdateNodePopUpOpen } from '@store/slices/Modules/fileManagerSlice';
+import { handleUpdateNodePopUpOpen } from '@store/slices/fileManagerSlice';
 
 export const UpdateNodePopUp = (props) => {
 

@@ -1,9 +1,9 @@
 import { AppLayout } from '@layouts/app';
 import { AdminContentLayout } from '@layouts/admin';
-import { FileManagerList, FileManagerActions } from '@components/Modules/FileManager';
-import { MakeDirPopUp, SubmitDeleteActionPopUp, UpdateNodePopUp } from '@components/Modules/FileManager/pop-up';
+import { FileManagerList, FileManagerActions } from '@components/FileManager';
+import { MakeDirPopUp, SubmitDeleteActionPopUp, UpdateNodePopUp } from '@components/FileManager/pop-up';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
-import { fetchFileManagerDirectory } from '@store/thunks/Modules';
+import { fetchFileManagerDirectory } from '@store/thunks';
 import { useEffect } from 'react';
 
 export default function FileManager(props) {

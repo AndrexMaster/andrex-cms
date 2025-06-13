@@ -1,5 +1,5 @@
-import { FileManagerDir, FileManagerFile } from '@types/Modules/file-manager';
-import { ManagerItem } from '@components/Modules/FileManager';
+import { FileManagerDir, FileManagerFile } from '@types/file-manager';
+import { ManagerItem } from '@components/FileManager/index';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import React, { useEffect, useRef, useState } from 'react';
 import {
@@ -8,10 +8,10 @@ import {
     handleSelectable,
     setBreadcrumbs,
     setCurrentDir
-} from '@store/slices/Modules/fileManagerSlice';
+} from '@store/slices/fileManagerSlice';
 import { ContextMenu, ContextMenuDivider, ContextMenuItem } from '@components/common/ContextMenu';
 import { ContextFileUpload } from '@components/common/ContextMenu/ContextFileUpload';
-import { uploadFileManagerFile } from '@store/thunks/Modules';
+import { uploadFileManagerFile } from '@store/thunks';
 
 interface FileManagerListProps {
     mainDirectory: FileManagerDir;

@@ -1,12 +1,9 @@
 <?php
 
-namespace App\Models\Modules\FileManager;
+namespace App\Models\FileManager;
 
-use App\Models\Category;
-use App\Models\ProductCharacteristic;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Support\Str;
 
 class FileManagerFile extends Model

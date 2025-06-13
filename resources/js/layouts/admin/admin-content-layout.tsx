@@ -3,7 +3,7 @@ import { PageIcon } from '@components/';
 import AdminSidebarLayout from '@layouts/admin/admin-sidebar-layout';
 import { getPageTitle } from '@hooks/use-breadcrumbs';
 import { AdminContentLayoutActions } from '@components/adminContent';
-import { FileManagerBreadcrumb } from '@types/Modules/file-manager';
+import { FileManagerBreadcrumb } from '@types/file-manager';
 import { ChevronRight } from 'lucide-react';
 
 export interface AdminContentLayoutInterface{

@@ -1,10 +1,10 @@
-import { FileManagerPopUpLayout } from '@components/Modules/FileManager/pop-up';
+import { FileManagerPopUpLayout } from '@components/FileManager/pop-up/index';
 import { AButton } from '@components/Buttons';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
-import { FileManagerDir, FileManagerFile } from '@types/Modules/file-manager';
-import { handleDeleteNodePopUpOpen } from '@store/slices/Modules/fileManagerSlice';
+import { FileManagerDir, FileManagerFile } from '@types/file-manager';
+import { handleDeleteNodePopUpOpen } from '@store/slices/fileManagerSlice';
 import { useEffect, useState } from 'react';
-import { deleteFileManagerNode } from '@store/thunks/Modules';
+import { deleteFileManagerNode } from '@store/thunks';
 
 export const SubmitDeleteActionPopUp = (props) => {
     const { isDeleteNodePopUpOpen, nodeToDelete, selectedNodes } : {

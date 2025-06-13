@@ -1,4 +1,4 @@
-import { FileManagerDir, FileManagerFile, FileManagerTree } from '@types/Modules/file-manager';
+import { FileManagerDir, FileManagerFile, FileManagerTree } from '@types/file-manager';
 import { Attributes, useState } from 'react';
 import { Folder, File, Square, SquareCheck, Settings } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
@@ -9,8 +9,8 @@ import {
     selectNode,
     setCurrentDir,
     setFileManagerTree, setNodeToDelete, setNodeToUpdate
-} from '@store/slices/Modules/fileManagerSlice';
-import { fetchFileManagerDirectory } from '@store/thunks/Modules';
+} from '@store/slices/fileManagerSlice';
+import { fetchFileManagerDirectory } from '@store/thunks';
 import log from 'eslint-plugin-react/lib/util/log';
 import { ContextMenu, ContextMenuItem, ContextMenuDivider  } from '@components/common/ContextMenu';
 

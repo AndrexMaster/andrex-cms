@@ -6,7 +6,7 @@ import {
     handleDeleteNodePopUpOpen,
     handleMakeDirPopUp,
     handleSelectable
-} from '@store/slices/Modules/fileManagerSlice';
+} from '@store/slices/fileManagerSlice';
 import { Plus, SendToBack, Settings, SquareStack, Trash2 } from 'lucide-react';
 import { Divider } from '@components/common';
 import { useMemo } from 'react';

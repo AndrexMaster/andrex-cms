@@ -1,6 +1,6 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from 'axios';
-import { FileManagerDir, FileManagerFile } from '@types/Modules/file-manager';
+import { FileManagerDir, FileManagerFile } from '@types/file-manager';
 import { nanoid } from 'nanoid';
 
 /*

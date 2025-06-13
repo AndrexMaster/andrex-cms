@@ -1,11 +1,11 @@
 import { TextField } from '@components/Fields';
-import { FileManagerPopUpLayout } from '@components/Modules/FileManager/pop-up';
+import { FileManagerPopUpLayout } from '@components/FileManager/pop-up/index';
 import { AButton } from '@components/Buttons';
 import { useEffect, useState } from 'react';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
-import { createFileManagerDirectory } from '@store/thunks/Modules';
+import { createFileManagerDirectory } from '@store/thunks';
 import { Plus } from 'lucide-react';
-import { handleMakeDirPopUp } from '@store/slices/Modules/fileManagerSlice';
+import { handleMakeDirPopUp } from '@store/slices/fileManagerSlice';
 
 export const MakeDirPopUp = () => {
     const [folderName, setFolderName] = useState('');

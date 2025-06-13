@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models\Modules\FileManager;
+namespace App\Models\FileManager;
 
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;

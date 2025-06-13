@@ -36,5 +36,5 @@ Route::prefix('admin')->group(function () {
 require __DIR__.'/settings.php';
 
 // Modules
-require __DIR__ . '/Modules/FIleManager/FileManagerApi.php';
-require __DIR__ . '/Modules/FIleManager/FileManagerWeb.php';
+require __DIR__ . '/FileManager/FileManagerApi.php';
+require __DIR__ . '/FileManager/FileManagerWeb.php';

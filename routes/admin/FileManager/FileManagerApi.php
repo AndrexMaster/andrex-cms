@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Modules\FileManager\ApiDirController;
-use App\Http\Controllers\Modules\FileManager\ApiFileController;
+use App\Http\Controllers\FileManager\ApiDirController;
+use App\Http\Controllers\FileManager\ApiFileController;
 use Illuminate\Support\Facades\Route;
 
 //Route::middleware(['auth', 'verified'])->prefix('admin')->group(function () {

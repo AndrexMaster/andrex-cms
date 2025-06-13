@@ -1,9 +1,11 @@
 <?php
 
-namespace App\Http\Controllers\Modules\FileManager;
+namespace App\Http\Controllers\FileManager;
 
-use App\Models\Modules\FileManager\FileManagerDirectory;
-use App\Models\Modules\FileManager\FileManagerFile;
+use App\Http\Controllers\Modules\FileManager\DB;
+use App\Http\Controllers\Modules\FileManager\Str;
+use App\Models\FileManager\FileManagerDirectory;
+use App\Models\FileManager\FileManagerFile;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -39,47 +41,72 @@ class ApiFileController
 
     public function upload(Request $request): JsonResponse
     {
+        $uploadedFilesData = [];
+        $directoryId = $request->input('directory_id');
+
+        $parentDirectory = FileManagerDirectory::find($directoryId);
+
+        if (!$parentDirectory) {
+            return response()->json(['message' => 'Родительская директория не найдена.'], 404);
+        }
+
+        $storagePath = $parentDirectory->path;
+
+        dd($storagePath);
+
+        DB::beginTransaction();
+
         try {
-            $validatedData = $request->validate([
-                'name' => ['required', 'string', 'max:255'],
-                'directory_id' => ['nullable', 'string', 'exists:file_manager_directories,id'],
-                'file' => 'required|image|mimes:jpeg,png,jpg,gif,svg|max:2048'
+            // Проходимся по каждому загруженному файлу
+            foreach ($request->file('files') as $file) {
+                // Генерируем уникальное имя файла для хранения (например, UUID + расширение)
+                $originalName = $file->getClientOriginalName();
+                $extension = $file->getClientOriginalExtension();
+                $fileName = Str::uuid() . '.' . $extension; // Используем Str::uuid() для уникальности
 
+                // Сохраняем файл на диске
+                // Storage::disk('public')->putFileAs('uploads/files', $file, $fileName);
+                // Или используем метод storeAs, который возвращает путь:
+                $filePath = Storage::disk('public')->putFileAs($storagePath, $file, $fileName);
 
-                // TODO: author_id & last_modified_by
-                // 'author_id' => ['nullable', 'uuid', 'exists:users,id'],
-                // 'last_modified_by' => ['nullable', 'uuid', 'exists:users,id'],
-            ]);
+                // Создаем запись о файле в базе данных
+                $fileManagerFile = FileManagerFile::create([
+                    'name' => $originalName, // Сохраняем оригинальное имя файла
+                    'path' => $filePath,       // Путь к файлу на диске
+                    'url' => Storage::disk('public')->url($filePath), // Публичный URL для доступа
+                    'directory_id' => $directoryId,
+                    'mime_type' => $file->getMimeType(),
+                    'size' => $file->getSize(), // Размер файла в байтах
+                    // 'user_id' => auth()->id(), // Если файлы привязаны к пользователю
+                ]);
 
-            $uploadedFile = $request->file('file');
-            $name = $validatedData['name']; // Это display name для БД
-            $directoryId = $validatedData['directory_id'] ?? null;
+                $uploadedFilesData[] = $fileManagerFile; // Добавляем созданный объект в список
+            }
 
-            $fileNameOnDisk = $uploadedFile->hashName('uploads');
-            $path = $uploadedFile->storeAs('uploads', $fileNameOnDisk, 'public');
+            DB::commit(); // Если все прошло успешно, фиксируем транзакцию
 
-            $newFile = FileManagerFile::query()->create([
-                'name' => $name,
-                'directory_id' => $directoryId,
-                'path' => $path,
-                'url' => Storage::url($path),
-                'size' => $uploadedFile->getSize(),
-                'mime_type' => $uploadedFile->getMimeType(),
-            ]);
-
+            // Возвращаем данные о загруженных файлах
             return response()->json([
-                'message' => 'Файл успешно загружен!',
-                'file' => $newFile
+                'message' => 'Файлы успешно загружены.',
+                'uploadedFiles' => $uploadedFilesData,
+                // Возможно, также верните обновленную родительскую директорию,
+                // если ее состояние (например, количество файлов) изменилось
+                // 'parent_dir' => $parentDirectory->fresh(),
             ], 200);
 
-        } catch (ValidationException $e) {
-            return response()->json([
-                'message' => 'Ошибка валидации входящих данных.',
-                'errors' => $e->errors()
-            ], 422);
         } catch (\Exception $e) {
+            DB::rollBack(); // В случае ошибки откатываем транзакцию (удаляем записи, если созданы)
+
+            // Если файлы были сохранены до ошибки в БД, их нужно удалить вручную
+            foreach ($uploadedFilesData as $uploadedFile) {
+                if (Storage::disk('public')->exists($uploadedFile->path)) {
+                    Storage::disk('public')->delete($uploadedFile->path);
+                }
+            }
+
             return response()->json([
-                'message' => 'Произошла непредвиденная ошибка при создании директории: ' . $e->getMessage()
+                'message' => 'Ошибка при загрузке файлов: ' . $e->getMessage(),
+                'error' => $e->getMessage(),
             ], 500);
         }
     }
