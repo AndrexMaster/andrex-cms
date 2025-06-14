@@ -44,7 +44,7 @@ export const ImageList = (props: ImageListProps) => {
                         <ImageContainer
                             key={imageData.id ?? index}
                         >
-                            <Image url={imageData?.url ?? imageData?.previewUrl ?? ''} alt={imageData.altText ?? ''} />
+                            <Image url={imageData?.url_thumbnail ?? imageData?.previewUrl ?? ''} alt={imageData.altText ?? ''} />
                         </ImageContainer>
                         <div>
                             <p>

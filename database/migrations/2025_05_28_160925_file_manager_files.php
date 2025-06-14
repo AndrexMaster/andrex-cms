@@ -15,9 +15,12 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->foreignUuid('directory_id')->nullable()->constrained('file_manager_directories');
             $table->string('name');
-            $table->integer('size');
-            $table->string('path');
-            $table->string('url');
+            $table->string('path_original');
+            $table->string('path_medium');
+            $table->string('path_thumbnail');
+            $table->string('url_original');
+            $table->string('url_medium');
+            $table->string('url_thumbnail');
             $table->string('mime_type');
 
             //TODO: update migration to connect user

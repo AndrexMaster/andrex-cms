@@ -12,11 +12,14 @@ class FileManagerFile extends Model
 
     protected $fillable = [
         'name',
-        'path',
-        'url',
+        'path_original',
+        'path_medium',
+        'path_thumbnail',
+        'url_original',
+        'url_medium',
+        'url_thumbnail',
         'mime_type',
         'directory_id',
-        'size',
         'type',
         'author_id',
         'last_modified_by',

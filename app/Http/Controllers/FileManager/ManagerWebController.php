@@ -15,6 +15,7 @@ class ManagerWebController extends Controller
      */
     public function index(Request $request): Response
     {
+//        phpinfo();
         $directory = FileManagerDirectory::query()
             ->whereNull('parent_id')
             ->with([

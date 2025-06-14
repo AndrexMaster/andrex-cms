@@ -78,7 +78,8 @@ export const FileManagerList = (props: FileManagerListProps) => {
     };
 
     const handleUploadFile = (files: File[]) => {
-        if (files.length > 1) {
+        if (files.length > 0) {
+            console.log('123123');
             dispatch(uploadFileManagerFile({ files: files, directoryId: currentDir.id }));
         }
     }
@@ -122,10 +123,6 @@ export const FileManagerList = (props: FileManagerListProps) => {
                 <ContextMenuItem data-action="create-new-folder">Создать папку</ContextMenuItem>
                 <ContextMenuItem
                     data-action="upload-file"
-                    fileInputRef={fileInputRef}
-                    handleUploadFile={handleUploadFile}
-                    variant={'file-loader'}
-
                 >
                     Загрузить файл
                 </ContextMenuItem>

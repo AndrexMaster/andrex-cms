@@ -11,8 +11,12 @@ export type FileManagerDir = DefaultNodeTypes & {
 export type FileManagerFile = DefaultNodeTypes & {
     directory_id: string;
     size: number;
-    path: string;
-    url: string;
+    path_original: string;
+    path_medium: string;
+    path_thumbnail: string;
+    url_original: string;
+    url_medium: string;
+    url_thumbnail: string;
     mime_type: string;
     author_id?: string; // User uuid
     last_modified_by: string; // User uuid

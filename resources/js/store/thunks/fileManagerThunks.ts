@@ -6,18 +6,18 @@ import { nanoid } from 'nanoid';
 /*
  * Directories
  * */
-export const fetchFileManagerDirectoryTree = createAsyncThunk(
-    'fileManager/fetchTree',
-    async (directoryId: string | null = null, { rejectWithValue }) => {
-        try {
-            const url = directoryId ? `/api/v1/admin/file-manager/${directoryId}` : '/api/file-manager/';
-            const response = await axios.get(url);
-            return response.data;
-        } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || error.message || 'Failed to load');
-        }
-    }
-);
+// export const fetchFileManagerDirectoryTree = createAsyncThunk(
+//     'fileManager/fetchTree',
+//     async (directoryId: string | null = null, { rejectWithValue }) => {
+//         try {
+//             const url = directoryId ? `/api/v1/admin/file-manager/${directoryId}` : '/api/file-manager/';
+//             const response = await axios.get(url);
+//             return response.data;
+//         } catch (error: any) {
+//             return rejectWithValue(error.response?.data?.message || error.message || 'Failed to load');
+//         }
+//     }
+// );
 
 export const fetchFileManagerDirectory = createAsyncThunk(
     'fileManager/fetchDirectory',
@@ -131,6 +131,19 @@ interface UploadFileSuccessResponse {
     uploadedFiles: FileManagerFile[];
 }
 
+interface UploadFilePayload {
+    files: File[];
+    directoryId: string;
+}
+
+interface UploadFileSuccessResponse {
+    uploadedFiles: FileManagerFile[];
+}
+
+/**
+ * Thunk для загрузки файлов на сервер.
+ * Отправляет FormData с файлами и ID директории.
+ */
 export const uploadFileManagerFile = createAsyncThunk<
     UploadFileSuccessResponse,
     UploadFilePayload,
@@ -138,7 +151,8 @@ export const uploadFileManagerFile = createAsyncThunk<
 >(
     'fileManager/uploadFile',
     async ({ files, directoryId }, { rejectWithValue }) => {
-        console.log('Initiating file upload...'); // Translated from '123123123'
+        console.log('Initiating file upload...');
+
         try {
             const url = `/api/v1/admin/file-manager/file`;
 
@@ -148,6 +162,7 @@ export const uploadFileManagerFile = createAsyncThunk<
             });
 
             formData.append('directory_id', directoryId);
+
             const response = await axios.post(url, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
@@ -155,7 +170,7 @@ export const uploadFileManagerFile = createAsyncThunk<
                 onUploadProgress: (progressEvent) => {
                     const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total!);
                     console.log(`Upload progress: ${percentCompleted}%`);
-                    // You can dispatch an action here to update the UI with progress
+                    //TODO: Диспатчить экшен для обновления UI с прогрессом загрузки
                 },
             });
 
@@ -169,17 +184,28 @@ export const uploadFileManagerFile = createAsyncThunk<
     }
 );
 
-
-export const updateFileManagerFile = createAsyncThunk(
+/**
+ * Thunk для обновления информации о файле (например, переименование или перемещение).
+ * Отправляет объект FileManagerFile, который должен содержать ID, новое имя и ID новой директории.
+ */
+export const updateFileManagerFile = createAsyncThunk<
+    FileManagerFile,
+    FileManagerFile,
+    { rejectValue: string }
+>(
     'fileManager/updateFile',
     async (file: FileManagerFile, { rejectWithValue }) => {
         try {
             const url = `/api/v1/admin/file-manager/file/${file.id}`;
-            // Assuming your backend expects the file object for update
-            const response = await axios.put(url, file);
+
+            const response = await axios.put<FileManagerFile>(url, file);
+
             return response.data;
         } catch (error: any) {
-            return rejectWithValue(error.response?.data?.message || error.message || 'Failed to update');
+            if (axios.isAxiosError(error) && error.response) {
+                return rejectWithValue(error.response.data.message || 'Failed to update file.');
+            }
+            return rejectWithValue(error.message || 'An unknown error occurred.');
         }
     }
 );

@@ -39,10 +39,10 @@ const ItemIcon = (props: ItemIconProps) => {
 
     switch (iconType) {
         case 'file':
-            if ((item as FileManagerFile)?.url?.length > 0) {
+            if ((item as FileManagerFile)?.url_thumbnail?.length > 0) {
                 return <img
                     width={iconSize}
-                    src={(item as FileManagerFile).url}
+                    src={(item as FileManagerFile).url_thumbnail}
                     className={`max-w-full h-auto aspect-square object-contain ${className}`}
                 />
             } else {
