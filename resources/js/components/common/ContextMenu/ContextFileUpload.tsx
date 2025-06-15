@@ -6,14 +6,13 @@ import { useAppDispatch } from '@store/hooks'; // Assuming this import is correc
 
 interface AddImageProps {
     variant?: 'button' | 'block';
-    handleUploadFile: (file: File[]) => void, // Prop ожидает массив File[]
+    handleUploadFile: (file: File[]) => void,
     fileInputRef?: Ref<HTMLInputElement>,
 }
 
 interface SelectedFileItem {
     file: File;
     previewUrl: string;
-    // position?: number; // Это поле не используется в текущей логике, можно оставить, если оно нужно для других целей
 }
 
 export const ContextFileUpload = (props: AddImageProps) => {
@@ -27,13 +26,10 @@ export const ContextFileUpload = (props: AddImageProps) => {
     const [message, setMessage] = useState(''); // Для сообщений, если нужно
 
     useEffect(() => {
-        // --- КЛЮЧЕВОЕ ИСПРАВЛЕНИЕ: Передаем только сами объекты File ---
-        if (selectedFiles.length > 0) { // Передаем данные только если есть выбранные файлы
+        if (selectedFiles.length > 0) {
             handleUploadFile(selectedFiles.map(item => item.file));
         }
-        // --- КОНЕЦ ИСПРАВЛЕНИЯ ---
 
-        // Функция очистки Object URL для предотвращения утечек памяти
         return () => {
             selectedFiles.forEach(item => {
                 if (item?.previewUrl) {
@@ -41,41 +37,30 @@ export const ContextFileUpload = (props: AddImageProps) => {
                 }
             });
         };
-    }, [selectedFiles, handleUploadFile]); // handleUploadFile добавлен в зависимости useEffect
+    }, [selectedFiles]);
 
     const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-        setMessage(''); // Сброс сообщения
+        setMessage('');
 
         if (event.target.files && event.target.files.length > 0) {
             const newFiles = Array.from(event.target.files);
 
-            // Отзываем предыдущие URL-ы для выбранных файлов перед добавлением новых
             selectedFiles.forEach(item => {
                 if (item?.previewUrl) {
                     URL.revokeObjectURL(item.previewUrl);
                 }
             });
 
-            // Создаем новые SelectedFileItem с предварительными URL
             const filesWithPreviews: SelectedFileItem[] = newFiles.map((file: File) => ({
                 file: file,
                 previewUrl: URL.createObjectURL(file),
-                // position: (selectedFiles ? selectedFiles.length : 0) + index + 1 // Если нужно, добавьте index
             }));
 
-            // Обновляем состояние: если нет предыдущих, устанавливаем новые; иначе добавляем к существующим
-            // В вашем исходном коде логика `if (!selectedFiles || selectedFiles.length <= 0)`
-            // не совсем корректна, так как `selectedFiles` всегда массив.
-            // Я предположил, что вы хотите заменить текущие файлы, если это новый выбор,
-            // или добавить к ним, если это мульти-выбор. Исправленная логика:
             setSelectedFiles(filesWithPreviews); // Заменяем текущие файлы на новые выбранные
 
-            // ВАЖНО: Сбрасываем значение input, чтобы событие onChange сработало,
-            // даже если пользователь выберет те же самые файлы повторно.
             event.target.value = '';
 
         } else {
-            // Если файлы не выбраны (например, пользователь закрыл диалог выбора файла без выбора)
             selectedFiles.forEach(item => {
                 if (item.previewUrl) {
                     URL.revokeObjectURL(item.previewUrl);

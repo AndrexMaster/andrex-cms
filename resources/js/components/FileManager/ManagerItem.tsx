@@ -158,7 +158,7 @@ export const ManagerItem = (props: ManagerItemProps) => {
                 <div>
                     {<ItemIcon iconType={type} item={item} />}
                 </div>
-                <span className={'flex-1 line-clamp-2'}>{item?.name ?? ''}</span>
+                <span className={'flex-1 line-clamp-2'} title={item.name}>{item?.name.slice(0, 4) + '...' + item?.name.slice(-6) ?? ''}</span>
             </div>
             <ContextMenu
                 isOpen={contextMenu.isOpen}

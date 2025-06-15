@@ -250,7 +250,19 @@ const fileManagerSlice = createSlice({
              *
              * */
             .addCase(uploadFileManagerFile.pending, (state: FileManagerState, action) => {
-                console.log('action.payload', action.payload);
+            // TODO: сделать позитивное добавление файлов
+            })
+            .addCase(uploadFileManagerFile.fulfilled, (state: FileManagerState, action) => {
+                state.currentDir = {
+                    ...state.currentDir,
+                    files: [
+                        ...state.currentDir?.files,
+                        ...action.payload.uploadedFiles
+                    ]
+                }
+            })
+            .addCase(uploadFileManagerFile.rejected, (state: FileManagerState, action) => {
+                // TODO: Сделать обработку ошибок выпадашкой
             })
 
 

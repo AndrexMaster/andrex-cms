@@ -77,7 +77,7 @@ class ApiFileController
         $directoryId = $request->input('directory_id');
 
         $rootPath = config('filesystems.disks.public.root_path', 'files/');
-        $parentDirectory = FileManagerDirectory::find($directoryId);
+        $parentDirectory = FileManagerDirectory::query()->find($directoryId);
 
         if (!$parentDirectory) {
             return response()->json(['message' => 'Parent directory not found.'], 404); // Переведено на английский
@@ -102,9 +102,12 @@ class ApiFileController
         try {
             $manager = new ImageManager(new Driver());
             foreach ($request->file('files') as $file) {
-                $originalName = $file->hashName();
+                $trimmedName = trim($file->getClientOriginalName(), '.'.$file->extension());
+                $originalName = $file->getClientOriginalName();
+            // TODO: the filename cannot contain any path characters, eg "/"
+
                 $extension = $file->extension();
-                $fileName = Str::uuid() . '.' . $extension;
+                $fileName = $trimmedName . '_' . Str::uuid() . '.' . $extension;
 
                 $filePath = Storage::disk('public')->putFileAs($storagePath, $file, $fileName);
 

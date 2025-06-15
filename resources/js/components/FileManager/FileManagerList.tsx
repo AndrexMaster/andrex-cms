@@ -79,7 +79,6 @@ export const FileManagerList = (props: FileManagerListProps) => {
 
     const handleUploadFile = (files: File[]) => {
         if (files.length > 0) {
-            console.log('123123');
             dispatch(uploadFileManagerFile({ files: files, directoryId: currentDir.id }));
         }
     }
@@ -127,7 +126,7 @@ export const FileManagerList = (props: FileManagerListProps) => {
                     Загрузить файл
                 </ContextMenuItem>
             </ContextMenu>
-            {fileInputRef && handleUploadFile && (
+            {fileInputRef && (
                 <ContextFileUpload fileInputRef={fileInputRef} handleUploadFile={handleUploadFile}/>
             )}
         </div>
