@@ -18,7 +18,7 @@ Route::prefix('file-manager')->group(function () {
     Route::prefix('file')->group(function () {
         Route::get('/{id}', [ApiFileController::class, 'show'])->name('file-manager.show');
         Route::post('/', [ApiFileController::class, 'upload'])->name('file-manager.upload');
-        Route::put('/{id}', [ApiFileController::class, 'update'])->name('file-manager.update');
+        Route::put('/{file:id}', [ApiFileController::class, 'update'])->name('file-manager.update');
         Route::delete('/', [ApiFileController::class, 'destroy'])->name('file-manager.destroy');
         Route::delete('/{file:id}', [ApiFileController::class, 'destroy'])->name('file-manager.destroy');
     });

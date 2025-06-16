@@ -4,7 +4,7 @@ import {
     createFileManagerDirectory, deleteFileManagerDirectory, deleteFileManagerFile, deleteFileManagerNode,
     fetchFileManagerDirectory,
     getBreadcrumbs,
-    updateFileManagerDirectory, uploadFileManagerFile
+    updateFileManagerDirectory, updateFileManagerFile, uploadFileManagerFile
 } from '@store/thunks';
 import {
     addDirectoryToCurrent,
@@ -265,7 +265,29 @@ const fileManagerSlice = createSlice({
             })
 
             /**
-             * Delete Directory
+             * Update File
+             */
+
+            .addCase(updateFileManagerFile.fulfilled, (state: FileManagerState, action) => {
+                const { file: newFile } : {file: FileManagerFile} = action.payload;
+                if (state?.currentDir?.id === newFile?.directory_id) {
+                    state.currentDir = {
+                        ...state.currentDir,
+                        files: state.currentDir?.files?.map((file) => {
+                            if (file.id === newFile.id) {
+                                return newFile
+                            }
+
+                            return file
+                        })
+                    };
+                }
+
+                state.isUpdateNodePopUpOpen = false
+            })
+
+            /**
+             * Delete File
              */
 
             .addCase(deleteFileManagerFile.fulfilled, (state: FileManagerState, action) => {

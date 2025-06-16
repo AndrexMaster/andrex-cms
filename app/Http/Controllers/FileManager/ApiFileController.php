@@ -80,7 +80,7 @@ class ApiFileController
         $parentDirectory = FileManagerDirectory::query()->find($directoryId);
 
         if (!$parentDirectory) {
-            return response()->json(['message' => 'Parent directory not found.'], 404); // Переведено на английский
+            return response()->json(['message' => 'Parent directory not found.'], 404);
         }
 
         $storagePath = rtrim($parentDirectory->path, '/');
@@ -104,7 +104,8 @@ class ApiFileController
             foreach ($request->file('files') as $file) {
                 $trimmedName = trim($file->getClientOriginalName(), '.'.$file->extension());
                 $originalName = $file->getClientOriginalName();
-            // TODO: the filename cannot contain any path characters, eg "/"
+
+                // TODO: the filename cannot contain any path characters, eg "/"
 
                 $extension = $file->extension();
                 $fileName = $trimmedName . '_' . Str::uuid() . '.' . $extension;
@@ -129,33 +130,36 @@ class ApiFileController
                     'url_thumbnail' => Storage::url($thumbnailPath),
                     'directory_id' => $directoryId,
                     'mime_type' => $file->getMimeType(),
-                    // 'user_id' => auth()->id(), // Добавьте, если нужно привязывать файл к пользователю
+                    // 'user_id' => auth()->id(),
                 ]);
 
-                $uploadedFilesData[] = $fileManagerFile; // Добавляем созданный объект в список
+                $uploadedFilesData[] = $fileManagerFile;
             }
 
             DB::commit(); // Фиксируем транзакцию
 
             return response()->json([
-                'message' => 'Files successfully uploaded.', // Переведено на английский
+                'message' => 'Files successfully uploaded.',
                 'uploadedFiles' => $uploadedFilesData,
-            ], 200);
+            ]);
 
         } catch (\Exception $e) {
-            DB::rollBack(); // В случае ошибки откатываем транзакцию
-
-            // Если файлы были сохранены на диске до ошибки в БД, их нужно удалить вручную
             foreach ($uploadedFilesData as $uploadedFile) {
-                if (Storage::disk('public')->exists($uploadedFile->path)) {
-                    Storage::disk('public')->delete($uploadedFile->path);
+                if (Storage::disk('public')->exists($uploadedFile->path_original)) {
+                    Storage::disk('public')->delete($uploadedFile->path_original);
+                }
+                if (Storage::disk('public')->exists($uploadedFile->path_medium)) {
+                    Storage::disk('public')->delete($uploadedFile->path_medium);
+                }
+                if (Storage::disk('public')->exists($uploadedFile->path_thumbnail)) {
+                    Storage::disk('public')->delete($uploadedFile->path_thumbnail);
                 }
             }
 
             Log::error('Error during file upload: ' . $e->getMessage(), ['directory_id' => $directoryId, 'uploaded_files' => $uploadedFilesData]); // Добавлено логирование ошибки
 
             return response()->json([
-                'message' => 'An unexpected error occurred during file upload: ' . $e->getMessage(), // Переведено на английский
+                'message' => 'An unexpected error occurred during file upload: ' . $e->getMessage(),
                 'error' => $e->getMessage(),
             ], 500);
         }
@@ -170,26 +174,25 @@ class ApiFileController
      */
     public function update(Request $request, FileManagerFile $file): JsonResponse
     {
-        // 1. Валидация входящих данных
         try {
             $validatedData = $request->validate([
                 'name' => ['required', 'string', 'max:255'],
-                'directory_id' => [ // Новая родительская директория (для перемещения)
-                    'required', // Теперь обязательно, чтобы всегда знать, в какой директории файл
+                'directory_id' => [
+                    'required',
                     'uuid',
                     'exists:file_manager_directories,id',
                 ],
             ], [
-                'name.required' => 'File name is required.', // Переведено на английский
-                'name.string' => 'File name must be a string.', // Переведено на английский
-                'name.max' => 'File name must not exceed 255 characters.', // Переведено на английский
-                'directory_id.required' => 'Directory ID is required.', // Переведено на английский
-                'directory_id.uuid' => 'Invalid Directory ID format.', // Переведено на английский
-                'directory_id.exists' => 'The specified directory was not found.', // Переведено на английский
+                'name.required' => 'File name is required.',
+                'name.string' => 'File name must be a string.',
+                'name.max' => 'File name must not exceed 255 characters.',
+                'directory_id.required' => 'Directory ID is required.',
+                'directory_id.uuid' => 'Invalid Directory ID format.',
+                'directory_id.exists' => 'The specified directory was not found.',
             ]);
         } catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Validation error for incoming data.', // Переведено на английский
+                'message' => 'Validation error for incoming data.',
                 'errors' => $e->errors()
             ], 422);
         }
@@ -197,97 +200,99 @@ class ApiFileController
         $newName = $validatedData['name'];
         $newDirectoryId = $validatedData['directory_id'];
 
-        // 2. Проверка на изменение имени или родительской директории
         $isNameChanged = ($newName !== $file->name);
         $isDirectoryChanged = ($newDirectoryId !== $file->directory_id);
 
-        // Если что-то изменилось, нужно проверить на уникальность имени в новой/текущей директории
         if ($isNameChanged || $isDirectoryChanged) {
             $existingFile = FileManagerFile::query()
                 ->where('name', $newName)
-                ->where('directory_id', $newDirectoryId) // Проверяем в новой (или текущей) директории
-                ->where('id', '!=', $file->id) // Игнорируем сам файл
+                ->where('directory_id', $newDirectoryId)
+                ->where('id', '!=', $file->id)
                 ->first();
 
             if ($existingFile) {
                 return response()->json([
-                    'message' => 'A file with this name already exists in the selected directory.', // Переведено на английский
+                    'message' => 'A file with this name already exists in the selected directory.',
                 ], 409);
             }
         }
 
-        // Если изменилась только директория, то нужно получить новый путь родителя
-        $newParentDirectory = FileManagerDirectory::find($newDirectoryId);
+        $newParentDirectory = FileManagerDirectory::query()->find($newDirectoryId);
         if (!$newParentDirectory) {
-            return response()->json(['message' => 'New parent directory not found.'], 404); // Переведено на английский
+            return response()->json(['message' => 'New parent directory not found.'], 404);
         }
 
-        $oldFilePathInDb = $file->path; // Старый путь файла в БД (например, 'files/dir1/image.jpg')
-        $oldFileUrlInDb = $file->url; // Старый URL файла в БД
+        $oldFilePathInDb = $file->path_original;
+        $oldFileUrlInDb = $file->url_original;
 
-        // Определяем новый путь для файла на диске
-        // Если имя файла изменилось, генерируем новое имя на диске (чтобы не было коллизий при переименовании, если слаг будет одинаковый)
-        // Если имя не изменилось, но директория изменилась, то имя на диске сохраняем
         $fileExtension = pathinfo($oldFilePathInDb, PATHINFO_EXTENSION);
-        $newFileNameOnDisk = ($isNameChanged || $isDirectoryChanged) ? Str::uuid() . '.' . $fileExtension : pathinfo($oldFilePathInDb, PATHINFO_BASENAME);
+
+        $trimmedName = trim($newName, '.'.$fileExtension);
+
+        $fileName = $trimmedName . '_' . Str::uuid() . '.' . $fileExtension;
 
 
-        // Формируем новый полный путь на диске
-        $newFullDiskPath = rtrim($newParentDirectory->path, '/') . '/' . $newFileNameOnDisk;
-        // Формируем новый URL
+
+        $newFullDiskPath = rtrim($newParentDirectory->path, '/') . '/' . $fileName;
         $newFullUrl = Storage::disk('public')->url($newFullDiskPath);
 
-        // Флаг, указывающий, нужно ли физически перемещать/переименовывать файл на диске
         $needsPhysicalMove = ($oldFilePathInDb !== $newFullDiskPath);
 
-        DB::beginTransaction(); // Начинаем транзакцию
+        DB::beginTransaction();
+
         try {
-            // 3. Обновляем запись файла в базе данных
             $file->name = $newName;
             $file->directory_id = $newDirectoryId;
-            $file->path = $newFullDiskPath; // Обновляем путь на диске
-            $file->url = $newFullUrl; // Обновляем URL
+            $file->path_original = $newFullDiskPath;
+            $file->url_original = $newFullUrl;
             $file->save();
 
-            // 4. Физическое перемещение/переименование файла на диске
             if ($needsPhysicalMove) {
                 if (!Storage::disk('public')->exists($oldFilePathInDb)) {
-                    // Если старого файла нет на диске, это проблема. Логируем и выбрасываем исключение.
-                    Log::error("Old physical file not found during update: " . $oldFilePathInDb); // Добавлено логирование
-                    throw new \Exception("Old physical file not found: " . $oldFilePathInDb); // Переведено на английский
+                    Log::error("Old physical file not found during update: " . $oldFilePathInDb);
+                    throw new \Exception("Old physical file not found: " . $oldFilePathInDb);
                 }
                 Storage::disk('public')->move($oldFilePathInDb, $newFullDiskPath);
             }
 
-            DB::commit(); // Фиксируем транзакцию
+            DB::commit();
 
             return response()->json([
-                'message' => 'File successfully updated.', // Переведено на английский
+                'message' => 'File successfully updated.',
                 'file' => $file
             ]);
 
         } catch (\Exception $e) {
-            DB::rollBack(); // Откатываем изменения в БД
+            DB::rollBack();
 
-            // Логика отката физического перемещения/переименования
-            if ($needsPhysicalMove && Storage::disk('public')->exists($newFullDiskPath) && !Storage::disk('public')->exists($oldFilePathInDb)) {
+            if (
+                $needsPhysicalMove &&
+                Storage::disk('public')->exists($newFullDiskPath) &&
+                !Storage::disk('public')->exists($oldFilePathInDb)
+            ) {
                 try {
                     Storage::disk('public')->move($newFullDiskPath, $oldFilePathInDb);
-                    Log::info("Physical file successfully rolled back after DB error: oldPath={$oldFilePathInDb}, newPath={$newFullDiskPath}"); // Добавлено логирование
+                    Log::info(
+                        "Physical file successfully rolled back after DB error: oldPath={$oldFilePathInDb}, newPath={$newFullDiskPath}"
+                    );
                 } catch (\Exception $rollbackException) {
-                    Log::critical("CRITICAL ERROR: Failed to rollback physical file. Disk and DB state diverged. " . // Переведено на английский
+                    Log::critical(
+                        "CRITICAL ERROR: Failed to rollback physical file. Disk and DB state diverged. " .
                         "Original error: {$e->getMessage()}. Rollback error: {$rollbackException->getMessage()}. " .
                         "File: {$file->id}, Old path: {$oldFilePathInDb}, New path: {$newFullDiskPath}");
                 }
             }
-            Log::error('An unexpected error occurred during file update: ' . $e->getMessage(), ['file_id' => $file->id, 'request_data' => $request->all()]); // Добавлено логирование
+            Log::error('An unexpected error occurred during file update: ' . $e->getMessage(),
+                ['file_id' => $file->id, 'request_data' => $request->all()]
+            );
 
             return response()->json([
-                'message' => 'An unexpected error occurred during file update: ' . $e->getMessage(), // Переведено на английский
+                'message' => 'An unexpected error occurred during file update: ' . $e->getMessage(),
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
+
 
     /**
      * Delete one or more files.
@@ -313,11 +318,11 @@ class ApiFileController
                 $filesIds = [$file->id];
 
             } else {
-                return response()->json(['message' => 'No file IDs specified for deletion.'], 400); // Переведено на английский
+                return response()->json(['message' => 'No file IDs specified for deletion.'], 400);
             }
         } catch (ValidationException $e) {
             return response()->json([
-                'message' => 'Validation error for incoming data.', // Переведено на английский
+                'message' => 'Validation error for incoming data.',
                 'errors' => $e->errors()
             ], 422);
         }
@@ -329,6 +334,9 @@ class ApiFileController
 
             $filesToDelete = FileManagerFile::query()->whereIn('id', $filesIds)->get();
 
+            /**
+             * @var FileManagerFile[] $filesToDelete
+             */
             foreach ($filesToDelete as $fileToDelete) {
                 $fileToDelete->delete();
 
@@ -357,7 +365,7 @@ class ApiFileController
 
         } catch (\Exception $e) {
             Log::critical('CRITICAL ERROR: Files were physically deleted, but DB transaction failed to rollback. Requires manual intervention. ' . // Переведено на английский
-                'Error: ' . $e->getMessage(), ['file_ids' => $fileIds]);
+                'Error: ' . $e->getMessage(), ['file_ids' => $filesIds]);
 
             return response()->json([
                 'message' => 'An unexpected error occurred while deleting files: ' . $e->getMessage(), // Переведено на английский
