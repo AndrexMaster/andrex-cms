@@ -10,17 +10,16 @@ import {
 import { Plus, SendToBack, Settings, SquareStack, Trash2 } from 'lucide-react';
 import { Divider } from '@components/common';
 import { useMemo } from 'react';
+import { uploadFileManagerFile } from '@store/thunks';
 
 export const FileManagerActions = () => {
     const dispatch = useAppDispatch()
-    const { currentDir, isSelectable } = useAppSelector(state => state.fileManager);
-
-    const selected = useMemo(() => {
-        return currentDir?.children.filter(child => child.isSelected)
-    }, [currentDir]);
+    const { currentDir, selectedNodes, isSelectable } = useAppSelector(state => state.fileManager);
 
     const handleUploadFile = (files: File[]) => {
-        console.log('handleUploadFile', files);
+        if (files.length > 0) {
+            dispatch(uploadFileManagerFile({ files: files, directoryId: currentDir.id }));
+        }
     }
 
     const createDir = () => {
@@ -53,14 +52,14 @@ export const FileManagerActions = () => {
                 Select
             </AButton>
             <FileUpload handleUploadFile={handleUploadFile}/>
-            {selected?.length === 1 && (
+            {selectedNodes?.length === 1 && (
                 <>
                     <Divider orientation={'vertical'} />
                     {/* //TODO: сделать*/}
                     <AButton onClick={createDir} color={'warning'} title={'Create dir'} startIcon={<Settings size={18}/>} >Edit</AButton>
                 </>
             )}
-            {selected?.length > 0 && (
+            {selectedNodes?.length > 0 && (
                 <>
                     <Divider orientation={'vertical'} />
                     {/* //TODO: сделать*/}

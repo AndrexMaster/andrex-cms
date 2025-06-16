@@ -8,6 +8,7 @@ interface AddImageProps {
     variant?: 'button' | 'block';
     handleUploadFile: (file: File[]) => void,
     fileInputRef?: Ref<HTMLInputElement>,
+    acceptedFileTypes?: string
 }
 
 interface SelectedFileItem {
@@ -20,6 +21,7 @@ export const ContextFileUpload = (props: AddImageProps) => {
         variant = 'button',
         handleUploadFile,
         fileInputRef,
+        acceptedFileTypes = "image/jpeg, image/png, image/gif, image/svg+xml"
     } = props;
 
     const [selectedFiles, setSelectedFiles] = useState<SelectedFileItem[]>([]);
@@ -86,6 +88,7 @@ export const ContextFileUpload = (props: AddImageProps) => {
                         onChange={handleFileChange}
                         multiple={true}
                         style={{ display: 'none' }}
+                        accept={acceptedFileTypes}
                     />
                 </div>
             )

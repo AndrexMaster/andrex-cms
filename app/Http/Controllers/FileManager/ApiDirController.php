@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\FileManager;
 
 use App\Models\FileManager\FileManagerDirectory;
+use App\Models\FileManager\FileManagerFile;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -203,10 +204,7 @@ class ApiDirController
             }
         }
 
-        $oldFullPathOnDisk = Storage::disk('public')->path($directory->path);
         $oldDbPath = $directory->path;
-
-        $newParentDirectory = null;
         $newParentPath = config('filesystems.disks.public.root_path', 'file_manager/');
 
         if ($newParentId) {
@@ -221,7 +219,6 @@ class ApiDirController
             $newParentPath .= '/';
         }
 
-        $pathSuffix = '';
         if ($isNameChanged) {
             $pathSuffix = Str::slug($newName) . '/';
         } else {
@@ -230,9 +227,7 @@ class ApiDirController
         }
 
         $newDbPath = $newParentPath . $pathSuffix;
-
         $pathActuallyChanged = ($newDbPath !== $oldDbPath);
-
 
         DB::beginTransaction();
         try {
@@ -300,8 +295,6 @@ class ApiDirController
     public function destroy(Request $request, ?FileManagerDirectory $directory = null): JsonResponse
     {
         try {
-            $directoryIds = [];
-
             if ($request->has('ids')) {
                 $validatedData = $request->validate([
                     'ids' => ['required', 'array'],
@@ -364,10 +357,10 @@ class ApiDirController
      * @param string $currentDirId ID of the current directory.
      * @return JsonResponse
      */
-    public function showBreadcrumbs(string $currentDirId)
+    public function showBreadcrumbs(string $currentDirId): JsonResponse
     {
         $breadcrumbs = [];
-        $current = FileManagerDirectory::find($currentDirId);
+        $current = FileManagerDirectory::query()->find($currentDirId);
 
         if (!$current) {
             abort(404);
@@ -407,12 +400,12 @@ class ApiDirController
         }
 
         foreach ($parentDirectory->files as $file) {
-            $oldFilePath = $file->path;
+            $oldFilePath = $file->path_original;
             $newFilePath = Str::replaceFirst($oldPrefix, $newPrefix, $oldFilePath);
             $newFileUrl = Storage::disk('public')->url($newFilePath);
 
-            $file->path = $newFilePath;
-            $file->url = $newFileUrl;
+            $file->path_original = $newFilePath;
+            $file->url_original = $newFileUrl;
             $file->save();
         }
     }
@@ -449,8 +442,14 @@ class ApiDirController
         }
 
         foreach ($directory->files as $file) {
-            if (Storage::disk('public')->exists($file->path)) {
-                Storage::disk('public')->delete($file->path);
+            if (Storage::disk('public')->exists($file->path_original)) {
+                Storage::disk('public')->delete($file->path_original);
+            }
+            if (Storage::disk('public')->exists($file->path_medium)) {
+                Storage::disk('public')->delete($file->path_medium);
+            }
+            if (Storage::disk('public')->exists($file->path_thumbnail)) {
+                Storage::disk('public')->delete($file->path_thumbnail);
             }
 
             $file->delete();

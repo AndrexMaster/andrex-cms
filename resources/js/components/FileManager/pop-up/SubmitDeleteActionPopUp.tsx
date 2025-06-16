@@ -4,7 +4,7 @@ import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { FileManagerDir, FileManagerFile } from '@types/file-manager';
 import { handleDeleteNodePopUpOpen } from '@store/slices/fileManagerSlice';
 import { useEffect, useState } from 'react';
-import { deleteFileManagerNode } from '@store/thunks';
+import { deleteFileManagerDirectory, deleteFileManagerFile } from '@store/thunks';
 
 export const SubmitDeleteActionPopUp = (props) => {
     const { isDeleteNodePopUpOpen, nodeToDelete, selectedNodes } : {
@@ -44,7 +44,16 @@ export const SubmitDeleteActionPopUp = (props) => {
     const dispatch = useAppDispatch()
 
     const deleteNode = () => {
-        dispatch(deleteFileManagerNode(selectedNodes?.length > 0 ? selectedNodes : nodeToDelete))
+        const files = (selectedNodes ?? [nodeToDelete])?.filter((node) => !Array.isArray((node as FileManagerDir).children))
+        const directories = (selectedNodes ?? [nodeToDelete])?.filter((node) => Array.isArray((node as FileManagerDir).children))
+
+
+        if (files?.length > 0) {
+            dispatch(deleteFileManagerFile(files))
+        }
+        if (directories?.length > 0) {
+            dispatch(deleteFileManagerDirectory(directories))
+        }
     }
 
     const closePopUp = () => {

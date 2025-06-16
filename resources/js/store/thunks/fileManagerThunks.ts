@@ -23,7 +23,7 @@ export const fetchFileManagerDirectory = createAsyncThunk(
     'fileManager/fetchDirectory',
     async (directoryId: string, { dispatch, rejectWithValue }) => {
         try {
-            const url = `/api/v1/admin/file-manager/${directoryId}`;
+            const url = `/api/v1/admin/file-manager/directory/${directoryId}`;
             const response = await axios.get(url);
 
             // Fetch breadcrumbs for the current directory
@@ -52,7 +52,7 @@ export const createFileManagerDirectory = createAsyncThunk<
         const tempId = nanoid();
 
         try {
-            const url = '/api/v1/admin/file-manager';
+            const url = '/api/v1/admin/file-manager/directory';
             const newDirData = {
                 name: name,
                 parent_id: parent_id,
@@ -70,26 +70,24 @@ export const createFileManagerDirectory = createAsyncThunk<
     }
 );
 
-export const deleteFileManagerNode = createAsyncThunk<
+export const deleteFileManagerDirectory = createAsyncThunk<
     any,
-    (FileManagerDir | FileManagerFile) | (FileManagerDir | FileManagerFile)[],
+    FileManagerDir | FileManagerDir[],
     { rejectValue: string }
 >(
-    'fileManager/deleteNode',
-    async (nodeToDelete: ((FileManagerDir | FileManagerFile) | (FileManagerDir | FileManagerFile)[]), { rejectWithValue }) => {
+    'fileManager/deleteDirectory',
+    async (dirToDelete: FileManagerDir | FileManagerDir[], { rejectWithValue }) => {
         try {
-            let url = '/api/v1/admin/file-manager/'
+            let url = '/api/v1/admin/file-manager/directory'
             let response;
 
-            if (!Array.isArray(nodeToDelete)) {
-                // Deleting a single node (directory or file)
-                url += `${nodeToDelete.id}`;
+            if (!Array.isArray(dirToDelete)) {
+                url += `${dirToDelete.id}`;
                 response = await axios.delete<any>(url);
             } else {
-                // Deleting multiple nodes (directories or files)
                 response = await axios.delete<any>(url, {
                     data: {
-                        ids: nodeToDelete.map(node => node.id)
+                        ids: dirToDelete.map(node => node.id)
                     },
                 });
             }
@@ -108,7 +106,7 @@ export const updateFileManagerDirectory = createAsyncThunk<
     'fileManager/updateDirectory',
     async (directoryToUpdate: FileManagerDir, { rejectWithValue }) => {
         try {
-            const url = `/api/v1/admin/file-manager/${directoryToUpdate.id}`;
+            const url = `/api/v1/admin/file-manager/directory/${directoryToUpdate.id}`;
             // Assuming your backend expects the full directory object for update
             const response = await axios.put<FileManagerDir>(url, directoryToUpdate);
             return response.data;
@@ -206,6 +204,34 @@ export const updateFileManagerFile = createAsyncThunk<
                 return rejectWithValue(error.response.data.message || 'Failed to update file.');
             }
             return rejectWithValue(error.message || 'An unknown error occurred.');
+        }
+    }
+);
+
+export const deleteFileManagerFile = createAsyncThunk<
+    any,
+    FileManagerFile | FileManagerFile[],
+    { rejectValue: string }
+>(
+    'fileManager/deleteFile',
+    async (fileToDelete: FileManagerFile | FileManagerFile[], { rejectWithValue }) => {
+        try {
+            let url = '/api/v1/admin/file-manager/file/'
+            let response;
+
+            if (!Array.isArray(fileToDelete)) {
+                url += `${fileToDelete.id}`;
+                response = await axios.delete<any>(url);
+            } else {
+                response = await axios.delete<any>(url, {
+                    data: {
+                        files: fileToDelete
+                    },
+                });
+            }
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || error.message || 'Deletion error');
         }
     }
 );

@@ -88,7 +88,7 @@ export const ContextMenu: React.FC<ContextMenuProps> = (props) => {
         >
             <ul className="list-none p-0 m-0">
                 {React.Children.map(children, child => {
-                    if (React.isValidElement(child)) {
+                    if (React.isValidElement(child) && !Array.isArray(child?.props?.children)) {
                         return React.cloneElement(child, {
                             onClick: () => {
                                 const action = (child.props as any)['data-action'];

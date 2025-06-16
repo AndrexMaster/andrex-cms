@@ -5,7 +5,17 @@ namespace App\Models\FileManager;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Str;
+
+/**
+ * @property string $name
+ * @property Str::uuid $parent_id
+ * @property string $path
+ * @property FileManagerDirectory[] $children
+ * @property FileManagerFile[] $files
+ */
 
 class FileManagerDirectory extends Model
 {
@@ -28,17 +38,17 @@ class FileManagerDirectory extends Model
         });
     }
 
-    public function parent()
+    public function parent(): BelongsTo
     {
         return $this->belongsTo(FileManagerDirectory::class, 'parent_id', 'id');
     }
 
-    public function children()
+    public function children(): HasMany
     {
         return $this->hasMany(FileManagerDirectory::class, 'parent_id');
     }
 
-    public function files()
+    public function files(): HasMany
     {
         return $this->hasMany(FileManagerFile::class, 'directory_id');
     }

@@ -1,7 +1,7 @@
 import { createSlice, current, PayloadAction } from '@reduxjs/toolkit';
 import { FileManagerDir, FileManagerFile, FileManagerTree } from '@types/file-manager';
 import {
-    createFileManagerDirectory, deleteFileManagerNode,
+    createFileManagerDirectory, deleteFileManagerDirectory, deleteFileManagerFile, deleteFileManagerNode,
     fetchFileManagerDirectory,
     getBreadcrumbs,
     updateFileManagerDirectory, uploadFileManagerFile
@@ -228,16 +228,15 @@ const fileManagerSlice = createSlice({
             })
 
             /**
-             * DeleteNode
+             * Delete Directory
              */
 
-            .addCase(deleteFileManagerNode.fulfilled, (state: FileManagerState, action) => {
+            .addCase(deleteFileManagerDirectory.fulfilled, (state: FileManagerState, action) => {
                 const response: {response: {message: string, deleted_ids: string[]}} = action.payload;
 
                 state.currentDir = {
                     ...state.currentDir,
                     children: removeNodeFromArr(state.currentDir?.children, response?.deleted_ids) as FileManagerDir[],
-                    files: removeNodeFromArr(state.currentDir?.files, response?.deleted_ids) as FileManagerFile[],
                 }
 
                 state.isDeleteNodePopUpOpen = false
@@ -265,6 +264,20 @@ const fileManagerSlice = createSlice({
                 // TODO: Сделать обработку ошибок выпадашкой
             })
 
+            /**
+             * Delete Directory
+             */
+
+            .addCase(deleteFileManagerFile.fulfilled, (state: FileManagerState, action) => {
+                const response: {response: {message: string, deleted_ids: string[]}} = action.payload;
+
+                state.currentDir = {
+                    ...state.currentDir,
+                    files: removeNodeFromArr(state.currentDir?.files, response?.deleted_ids) as FileManagerFile[],
+                }
+
+                state.isDeleteNodePopUpOpen = false
+            })
 
             /**
              * Get Breadcrumbs

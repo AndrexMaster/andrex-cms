@@ -1,5 +1,5 @@
 import { FileManagerDir, FileManagerFile, FileManagerTree } from '@types/file-manager';
-import { Attributes, useState } from 'react';
+import React, {Attributes, Fragment, useRef, useState } from 'react';
 import { Folder, File, Square, SquareCheck, Settings } from 'lucide-react';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import {
@@ -71,6 +71,7 @@ export const ManagerItem = (props: ManagerItemProps) => {
 
     const isSelectable: boolean = useAppSelector((state) => state.fileManager.isSelectable);
     const [isMouseEnter, setIsMouseEnter] = useState(false);
+    const linkRef = useRef(null);
 
     const dispatch = useAppDispatch()
 
@@ -127,6 +128,10 @@ export const ManagerItem = (props: ManagerItemProps) => {
             case 'delete':
                 dispatch(setNodeToDelete(item))
                 dispatch(handleDeleteNodePopUpOpen(true))
+                break;
+            case 'download':
+                linkRef.current.click();
+                break;
         }
     };
 
@@ -158,7 +163,19 @@ export const ManagerItem = (props: ManagerItemProps) => {
                 <div>
                     {<ItemIcon iconType={type} item={item} />}
                 </div>
-                <span className={'flex-1 line-clamp-2'} title={item.name}>{item?.name.slice(0, 4) + '...' + item?.name.slice(-6) ?? ''}</span>
+                <span className={'flex-1 line-clamp-2'} title={item.name}>
+                    {Array.isArray((item as FileManagerDir)?.children) ? (
+                        item?.name ?? ''
+                    ) : (
+                        item?.name?.length > 5 ?
+                            item?.name.slice(0, 4) + '...' + item?.name.slice(-6)
+                        :
+                            item?.name ?? ''
+                    )}
+                </span>
+                {(item as FileManagerFile)?.url_original?.length > 0 && (
+                    <a className={'hidden'} ref={linkRef} href={(item as FileManagerFile).url_original} download></a>
+                )}
             </div>
             <ContextMenu
                 isOpen={contextMenu.isOpen}
@@ -174,11 +191,10 @@ export const ManagerItem = (props: ManagerItemProps) => {
                 {contextMenu.data && (contextMenu.data as FileManagerDir).children ? (
                     null
                     // <ContextMenuItem data-action="create-new-folder">Создать папку</ContextMenuItem>
+                ) : (item as FileManagerFile)?.url_original?.length > 0 ? (
+                    <ContextMenuItem data-action="download">Скачать</ContextMenuItem>
                 ) : (
-                    <>
-                        <ContextMenuDivider />
-                        <ContextMenuItem data-action="download">Скачать</ContextMenuItem>
-                    </>
+                    null
                 )}
             </ContextMenu>
         </div>

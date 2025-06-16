@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
@@ -15,7 +16,6 @@ use Intervention\Image\Drivers\Gd\Driver;
 use Intervention\Image\Facades\Image;
 use Intervention\Image\ImageManager;
 use Intervention\Image\Encoders\AutoEncoder;
-use Log; // Добавлено для логирования критических ошибок
 
 class ApiFileController
 {
@@ -298,28 +298,23 @@ class ApiFileController
      */
     public function destroy(Request $request, ?FileManagerFile $file = null): JsonResponse
     {
-        // 1. Валидация входящих данных
         try {
-            $fileIds = [];
-
-            if ($request->has('ids')) {
-                // Удаление по массиву ID
+            if ($request->has('files')) {
                 $validatedData = $request->validate([
-                    'ids' => ['required', 'array'],
-                    'ids.*' => ['uuid', 'exists:file_manager_files,id'], // Проверяем существование в таблице файлов
+                    'files' => ['required', 'array'],
+                    'files.*.id' => ['uuid', 'exists:file_manager_files,id'],
                 ], [
-                    'ids.required' => 'At least one file ID is required for deletion.', // Переведено на английский
-                    'ids.*.uuid' => 'Invalid file ID format.', // Переведено на английский
-                    'ids.*.exists' => 'One or more specified files were not found.', // Переведено на английский
+                    'files.required' => 'At least one file ID is required for deletion.',
+                    'files.*.uuid' => 'Invalid file ID format.',
+                    'files.*.exists' => 'One or more specified files were not found.',
                 ]);
-                $fileIds = $validatedData['ids'];
+                $filesIds = $validatedData['files'];
             } elseif ($file !== null) {
-                // Удаление одного файла по Route Model Binding
-                $fileIds = [$file->id];
+                $filesIds = [$file->id];
+
             } else {
                 return response()->json(['message' => 'No file IDs specified for deletion.'], 400); // Переведено на английский
             }
-
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => 'Validation error for incoming data.', // Переведено на английский
@@ -327,44 +322,42 @@ class ApiFileController
             ], 422);
         }
 
-        DB::beginTransaction(); // Начинаем транзакцию
+        DB::beginTransaction();
         try {
             $deletedCount = 0;
             $deletedIds = [];
-            $deletedFilePaths = []; // Для отката, если понадобится
 
-            // Получаем модели файлов для удаления
-            $filesToDelete = FileManagerFile::query()->whereIn('id', $fileIds)->get();
+            $filesToDelete = FileManagerFile::query()->whereIn('id', $filesIds)->get();
 
             foreach ($filesToDelete as $fileToDelete) {
-                // Удаляем физический файл с диска
-                if (Storage::disk('public')->exists($fileToDelete->path)) {
-                    Storage::disk('public')->delete($fileToDelete->path);
-                    $deletedFilePaths[] = $fileToDelete->path; // Сохраняем путь для возможного отката
+                $fileToDelete->delete();
+
+                if (Storage::disk('public')->exists($fileToDelete->path_original)) {
+                    Storage::disk('public')->delete($fileToDelete->path_original);
                 }
 
-                // Удаляем запись о файле из базы данных (используем soft delete, если он настроен)
-                $fileToDelete->delete();
-                $deletedCount++;
+                if (Storage::disk('public')->exists($fileToDelete->path_thumbnail)) {
+                    Storage::disk('public')->delete($fileToDelete->path_thumbnail);
+                }
+
+                if (Storage::disk('public')->exists($fileToDelete->path_medium)) {
+                    Storage::disk('public')->delete($fileToDelete->path_medium);
+                }
+
                 $deletedIds[] = $fileToDelete->id;
+                $deletedCount++;
             }
 
-            DB::commit(); // Фиксируем транзакцию
+            DB::commit();
 
             return response()->json([
-                'message' => "Deleted {$deletedCount} files.", // Переведено на английский
+                'message' => "Deleted {$deletedCount} files.",
                 'deleted_ids' => $deletedIds,
-            ], 200); // 200 OK, так как возвращаем информацию
+            ]);
 
         } catch (\Exception $e) {
-            DB::rollBack(); // Откатываем изменения в БД
-
-            // Логика отката физического удаления, если оно произошло, но запись в БД не удалилась
-            // (это крайне сложно откатить физически - обычно это требует ручного вмешательства или системы резервного копирования)
-            // Здесь мы просто логируем критическую ошибку, так как восстановление удаленного файла
-            // без его наличия в исходном месте - невозможно.
             Log::critical('CRITICAL ERROR: Files were physically deleted, but DB transaction failed to rollback. Requires manual intervention. ' . // Переведено на английский
-                'Error: ' . $e->getMessage(), ['file_ids' => $fileIds, 'deleted_paths_before_db_rollback' => $deletedFilePaths]);
+                'Error: ' . $e->getMessage(), ['file_ids' => $fileIds]);
 
             return response()->json([
                 'message' => 'An unexpected error occurred while deleting files: ' . $e->getMessage(), // Переведено на английский
