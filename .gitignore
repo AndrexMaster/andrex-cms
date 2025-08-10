@@ -9,6 +9,7 @@
 /storage/*.key
 /bootstrap/cache/*
 /public/build # Для Vite/Mix
+.idea
 
 # Docker
 .dockerignore
@@ -17,7 +18,6 @@ docker-compose.override.yml # Если вы используете локаль�
 /.docker # Скрытые Docker-файлы/папки
 
 # Node.js / React / Inertia / TypeScript
-/node_modules
 npm-debug.log
 yarn-error.log
 .pnpm-store/ # Если используете pnpm
@@ -43,7 +43,6 @@ Thumbs.db # Windows specific files
 /.phpunit.result.cache
 
 # Различные временные файлы и логи
-*.log
 *.backup
 *.swp
 *.swo
