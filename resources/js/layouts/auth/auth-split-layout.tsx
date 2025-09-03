@@ -1,4 +1,4 @@
-import { type SharedData } from '@/types';
+import { type SharedData } from '@types';
 import { Link, usePage } from '@inertiajs/react';
 import { type PropsWithChildren } from 'react';
 

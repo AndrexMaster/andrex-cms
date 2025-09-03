@@ -1,3 +1,4 @@
+import React from 'react';
 import { Footer, Header, NavLinks } from '@components/sidebar';
 import { BreadcrumbItem } from '@types/index';
 

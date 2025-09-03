@@ -1,11 +1,13 @@
-export interface DefaultFieldProps {
+export interface DefaultFieldProps<Type> {
     title: string;
     defaultValue?: string | number;
     placeholder: string;
-    type?: 'text';
+    type?: Type;
     className?: string;
     disabled?: boolean;
-    onChange?: (e) => void;
-    onFocus?: (e) => void;
-    onBlur?: (e) => void;
+    onChange?: (value) => void;
+    onFocus?: (value) => void;
+    onBlur?: (value) => void;
+    name?: string;
+    required?: boolean;
 }
