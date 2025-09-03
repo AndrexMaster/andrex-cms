@@ -1,6 +1,7 @@
 import { type ReactNode } from 'react';
 import { Head } from '@inertiajs/react';
 import { getBreadcrumbs } from '@hooks/use-breadcrumbs';
+import React from 'react';
 
 interface AppLayoutProps {
     children: ReactNode;

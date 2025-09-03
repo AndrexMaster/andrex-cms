@@ -1,9 +1,9 @@
-import { useEffect, useState } from 'react';
-import { DefaultFieldProps } from '@types/fields';
+import React from 'react';
 
 interface FieldLayoutInterface {
     title: string,
     isTitleRaised: boolean;
+    children: React.ReactNode;
 }
 
 export const FieldLayout = (props: FieldLayoutInterface) => {
