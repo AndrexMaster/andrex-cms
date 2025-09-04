@@ -1,88 +1,84 @@
+import React from 'react';
 import { AppLayout } from '@layouts/app';
 import { AdminContentLayout } from '@layouts/admin';
 import { ImageList, ImageModificationContainer } from '@components/Image';
 import { ProductMainData } from '@components/adminContent/Product';
 import { TextField } from '@components/Fields';
-import { useSlugifyProductName } from '@lib/make-slug';
+import { useSlugifyString } from '@lib/make-slug';
 import { useEffect, useState } from 'react';
 import { AutocompleteField } from '@components/Fields/AutocompleteField';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { setProduct, updateProduct } from '@store/slices/productSlice';
 import useDebounce from '@hooks/use-debounce';
 import { Product, ProductPhoto } from '@types/product';
-import axios from 'axios';
 
-export default function Pages(props) {
+export default function Pages(props: unknown) {
     const storedProduct: Product = useAppSelector((state) => state.product.product);
-    const dispatch = useAppDispatch()
+    const dispatch = useAppDispatch();
 
-    const [productTitle, setProductTitle] = useState<string>('')
+    const [productTitle, setProductTitle] = useState<string>('');
 
     const debouncedSearchTerm = useDebounce<string>(productTitle, 500);
 
     useEffect(() => {
-        dispatch(updateProduct({
-            ...storedProduct,
-            title: debouncedSearchTerm,
-        }))
-    }, [debouncedSearchTerm, dispatch]);
+        dispatch(
+            updateProduct({
+                ...storedProduct,
+                title: debouncedSearchTerm,
+            }),
+        );
+    }, [debouncedSearchTerm, dispatch, storedProduct]);
 
     useEffect(() => {
         if (props.product) {
-            dispatch(setProduct(props.product))
+            dispatch(setProduct(props.product));
         }
-    }, [props]);
+    }, [dispatch, props]);
 
     const addImage = (photos: ProductPhoto[]) => {
-        dispatch(updateProduct({
-            ...storedProduct,
-            photos: photos,
-        }))
-    }
+        dispatch(
+            updateProduct({
+                ...storedProduct,
+                photos: photos,
+            }),
+        );
+    };
 
-
-    const tempArray = [ // Категории
+    const tempArray = [
+        // Категории
         {
             id: 1,
-            title: 'LOH'
+            title: 'LOH',
         },
         {
             id: 2,
-            title: 'LOH2'
+            title: 'LOH2',
         },
         {
             id: 3,
-            title: 'LOH3'
+            title: 'LOH3',
         },
         {
             id: 4,
-            title: 'LOH4'
+            title: 'LOH4',
         },
         {
             id: 5,
-            title: 'LOH5'
+            title: 'LOH5',
         },
-    ]
+    ];
 
     return (
-
         // useSlugifyProductName
         <AppLayout>
-            <AdminContentLayout
-                contentActionsVariant={'editing'}
-            >
+            <AdminContentLayout contentActionsVariant={'editing'}>
                 <div className={'flex flex-col gap-6'}>
                     <div className={'flex flex-row gap-4'}>
-                        <TextField
-                            title={'Product Title'}
-                            placeholder={'Product Title'}
-                            defaultValue={''}
-                            onChange={(val) => setProductTitle(val)}
-                        />
+                        <TextField title={'Product Title'} placeholder={'Product Title'} defaultValue={''} onChange={(val) => setProductTitle(val)} />
                         <TextField
                             title={'Product slug'}
                             placeholder={'Product slug'}
-                            defaultValue={useSlugifyProductName(productTitle)}
+                            defaultValue={useSlugifyString(productTitle)}
                             disabled={true}
                         />
                     </div>
@@ -95,14 +91,12 @@ export default function Pages(props) {
                             searchableList={tempArray}
                         />
                     </div>
-                    <hr/>
-                    <ImageModificationContainer
-                        addImage={addImage}
-                    >
-                        <ImageList maxHeight={150} images={storedProduct.photos}/>
+                    <hr />
+                    <ImageModificationContainer addImage={addImage}>
+                        <ImageList maxHeight={150} images={storedProduct.photos} />
                     </ImageModificationContainer>
-                    <hr/>
-                    <ProductMainData/>
+                    <hr />
+                    <ProductMainData />
                     {/*<hr/>*/}
                     {/*<ProductAdditionalData/>*/}
                 </div>

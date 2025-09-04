@@ -18,9 +18,12 @@ Route::prefix('admin')->group(function () {
     Route::get('products/{slug}', [ProductController::class, 'show'])->name('products.show');
 
     // Categories
-    Route::get('categories', [CategoryController::class, 'index'])->name('categories');
-    Route::get('categories/new', [CategoryController::class, 'new'])->name('products.new');
-    Route::get('categories/{slug}', [CategoryController::class, 'show'])->name('products.show');
+    Route::get('categories', [CategoryController::class, 'index'])->name('categories.index');
+    Route::get('categories/new', [CategoryController::class, 'new'])->name('categories.new');
+    Route::get('categories/{slug}', [CategoryController::class, 'show'])->name('categories.show');
+
+    Route::post('categories/create', [CategoryController::class, 'store'])->name('categories.store');
+    Route::post('categories/{slug}', [CategoryController::class, 'create'])->name('categories.create');
 
     // Pages
     Route::get('pages', function () {

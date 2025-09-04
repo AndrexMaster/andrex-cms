@@ -37,6 +37,6 @@ const slugify = (text: string, options: SlugifyOptions = {}): string => {
     return slug;
 };
 
-export const useSlugifyProductName = (productName: string, options: SlugifyOptions = {}): string => {
-    return useCallback(() => slugify(productName, options), [productName, options])();
+export const useSlugifyString = (str: string, options: SlugifyOptions = {}): string => {
+    return useCallback(() => slugify(str, options), [str, options])();
 };

@@ -1,10 +1,11 @@
-import { JSX, ReactNode, useEffect } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { PageIcon } from '@components/';
 import AdminSidebarLayout from '@layouts/admin/admin-sidebar-layout';
 import { getPageTitle } from '@hooks/use-breadcrumbs';
 import { AdminContentLayoutActions } from '@components/adminContent';
 import { FileManagerBreadcrumb } from '@types/file-manager';
 import { ChevronRight } from 'lucide-react';
+import React from 'react';
 
 export interface AdminContentLayoutInterface{
     children: ReactNode;
