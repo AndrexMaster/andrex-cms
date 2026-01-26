@@ -1,5 +1,5 @@
 import { Button } from '@headlessui/react';
-import { JSX, ReactNode, useEffect, useMemo } from 'react';
+import { JSX, ReactNode, useMemo } from 'react';
 import { Link } from '@inertiajs/react';
 
 interface ButtonInterface {
@@ -35,11 +35,13 @@ export const AButton = (props: ButtonInterface) => {
         switch (color) {
             case 'warning':
                 return ''
+            case 'success':
+                return 'bg-green-500/10 hover:bg-green-500/30 text-white'
             default:
                 if (variant === 'iconButton') {
                     return 'hover:bg-stone-50/10'
                 } else {
-                    return 'background-white'
+                    return 'hover:bg-white/10'
                     // return 'border-white background-white'
                 }
 
@@ -49,7 +51,7 @@ export const AButton = (props: ButtonInterface) => {
     const getVariantBasedStyles = useMemo(() => {
         switch (variant) {
             case 'outlined':
-                return 'border-1 border-solid background-white';
+                return 'border-1 border-solid ';
             case 'iconButton':
                 return 'hover:'
             case 'text':
@@ -58,7 +60,7 @@ export const AButton = (props: ButtonInterface) => {
     }, [color]);
 
     const buttonClasses = useMemo(() => {
-        let classes = `flex items-center px-2 justify-center gap-1 rounded-md transition hover:bg-white/10 ${colorBasedStyle} ${getVariantBasedStyles}`;
+        let classes = `flex items-center px-2 justify-center gap-1 rounded-md transition ${colorBasedStyle} ${getVariantBasedStyles}`;
 
         if (children) {
             classes += ' py-1'

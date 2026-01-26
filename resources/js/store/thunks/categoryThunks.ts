@@ -1,0 +1,255 @@
+import { createAsyncThunk } from '@reduxjs/toolkit';
+import axios from 'axios';
+import { FileManagerDir, FileManagerFile } from '@types/file-manager';
+import { nanoid } from 'nanoid';
+
+/*
+ * Directories
+ * */
+// export const fetchFileManagerDirectoryTree = createAsyncThunk(
+//     'fileManager/fetchTree',
+//     async (directoryId: string | null = null, { rejectWithValue }) => {
+//         try {
+//             const url = directoryId ? `/api/v1/admin/file-manager/${directoryId}` : '/api/file-manager/';
+//             const response = await axios.get(url);
+//             return response.data;
+//         } catch (error: any) {
+//             return rejectWithValue(error.response?.data?.message || error.message || 'Failed to load');
+//         }
+//     }
+// );
+
+export const fetchFileManagerDirectory = createAsyncThunk(
+    'fileManager/fetchDirectory',
+    async (directoryId: string, { dispatch, rejectWithValue }) => {
+        try {
+            const url = `/api/v1/admin/file-manager/directory/${directoryId}`;
+            const response = await axios.get(url);
+
+            // Fetch breadcrumbs for the current directory
+            await dispatch(getBreadcrumbs(directoryId));
+
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || error.message || 'Failed to load');
+        }
+    }
+);
+
+interface CreateDirectoryResponse {
+    data: FileManagerDir;
+    tempId: string;
+    parentId: string | null;
+}
+
+export const createFileManagerDirectory = createAsyncThunk<
+    CreateDirectoryResponse,
+    { name: string; parent_id?: string | null },
+    { rejectValue: string }
+>(
+    'fileManager/createDirectory',
+    async ({ name, parent_id = null }, { rejectWithValue }) => {
+        const tempId = nanoid();
+
+        try {
+            const url = '/api/v1/admin/file-manager/directory';
+            const newDirData = {
+                name: name,
+                parent_id: parent_id,
+            };
+            const response = await axios.post<{directory: FileManagerDir}>(url, newDirData);
+
+            return {
+                data: response.data,
+                tempId: tempId,
+                parentId: parent_id,
+            };
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || error.message || 'Error creating folder');
+        }
+    }
+);
+
+export const deleteFileManagerDirectory = createAsyncThunk<
+    any,
+    FileManagerDir | FileManagerDir[],
+    { rejectValue: string }
+>(
+    'fileManager/deleteDirectory',
+    async (dirToDelete: FileManagerDir | FileManagerDir[], { rejectWithValue }) => {
+        try {
+            let url = '/api/v1/admin/file-manager/directory'
+            let response;
+
+            if (!Array.isArray(dirToDelete)) {
+                url += `${dirToDelete.id}`;
+                response = await axios.delete<any>(url);
+            } else {
+                response = await axios.delete<any>(url, {
+                    data: {
+                        ids: dirToDelete.map(node => node.id)
+                    },
+                });
+            }
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || error.message || 'Deletion error');
+        }
+    }
+);
+
+export const updateFileManagerDirectory = createAsyncThunk<
+    FileManagerDir,
+    FileManagerDir,
+    { rejectValue: string }
+>(
+    'fileManager/updateDirectory',
+    async (directoryToUpdate: FileManagerDir, { rejectWithValue }) => {
+        try {
+            const url = `/api/v1/admin/file-manager/directory/${directoryToUpdate.id}`;
+            // Assuming your backend expects the full directory object for update
+            const response = await axios.put<FileManagerDir>(url, directoryToUpdate);
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || error.message || 'Failed to update');
+        }
+    }
+);
+
+/*
+ * Files
+ * */
+
+interface UploadFilePayload {
+    files: File[];
+    directoryId: string;
+}
+
+interface UploadFileSuccessResponse {
+    uploadedFiles: FileManagerFile[];
+}
+
+interface UploadFilePayload {
+    files: File[];
+    directoryId: string;
+}
+
+interface UploadFileSuccessResponse {
+    uploadedFiles: FileManagerFile[];
+}
+
+/**
+ * Thunk для загрузки файлов на сервер.
+ * Отправляет FormData с файлами и ID директории.
+ */
+export const uploadFileManagerFile = createAsyncThunk<
+    UploadFileSuccessResponse,
+    UploadFilePayload,
+    { rejectValue: string }
+>(
+    'fileManager/uploadFile',
+    async ({ files, directoryId }, { rejectWithValue }) => {
+        console.log('Initiating file upload...');
+
+        try {
+            const url = `/api/v1/admin/file-manager/file`;
+
+            const formData = new FormData();
+            files.forEach((file, index) => {
+                formData.append(`files[${index}]`, file);
+            });
+
+            formData.append('directory_id', directoryId);
+
+            const response = await axios.post(url, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+                onUploadProgress: (progressEvent) => {
+                    const percentCompleted = Math.round((progressEvent.loaded * 100) / progressEvent.total!);
+                    console.log(`Upload progress: ${percentCompleted}%`);
+                    //TODO: Диспатчить экшен для обновления UI с прогрессом загрузки
+                },
+            });
+
+            return response.data;
+        } catch (error: any) {
+            if (axios.isAxiosError(error) && error.response) {
+                return rejectWithValue(error.response.data.message || 'File upload error.');
+            }
+            return rejectWithValue(error.message || 'An unknown error occurred.');
+        }
+    }
+);
+
+/**
+ * Thunk для обновления информации о файле (например, переименование или перемещение).
+ * Отправляет объект FileManagerFile, который должен содержать ID, новое имя и ID новой директории.
+ */
+export const updateFileManagerFile = createAsyncThunk<
+    FileManagerFile,
+    FileManagerFile,
+    { rejectValue: string }
+>(
+    'fileManager/updateFile',
+    async (file: FileManagerFile, { rejectWithValue }) => {
+        try {
+            const url = `/api/v1/admin/file-manager/file/${file.id}`;
+
+            const response = await axios.put<FileManagerFile>(url, file);
+
+            return response.data;
+        } catch (error: any) {
+            if (axios.isAxiosError(error) && error.response) {
+                return rejectWithValue(error.response.data.message || 'Failed to update file.');
+            }
+            return rejectWithValue(error.message || 'An unknown error occurred.');
+        }
+    }
+);
+
+export const deleteFileManagerFile = createAsyncThunk<
+    any,
+    FileManagerFile | FileManagerFile[],
+    { rejectValue: string }
+>(
+    'fileManager/deleteFile',
+    async (fileToDelete: FileManagerFile | FileManagerFile[], { rejectWithValue }) => {
+        try {
+            let url = '/api/v1/admin/file-manager/file/'
+            let response;
+
+            if (!Array.isArray(fileToDelete)) {
+                url += `${fileToDelete.id}`;
+                response = await axios.delete<any>(url);
+            } else {
+                response = await axios.delete<any>(url, {
+                    data: {
+                        files: fileToDelete
+                    },
+                });
+            }
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || error.message || 'Deletion error');
+        }
+    }
+);
+
+/*
+ * Breadcrumbs
+ * */
+
+
+export const getBreadcrumbs = createAsyncThunk(
+    'fileManager/getBreadcrumbs',
+    async (currentDirectoryId: string, { rejectWithValue }) => {
+        try {
+            const url = `/api/v1/admin/file-manager/breadcrumbs/${currentDirectoryId}`;
+            const response = await axios.get(url);
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || error.message || 'Failed to load');
+        }
+    }
+);

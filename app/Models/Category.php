@@ -18,6 +18,13 @@ class Category extends Model
         'parent_id',
     ];
 
+    protected $casts = [
+        'id' => 'integer',
+        'slug' => 'string',
+        'description',
+        'parent_id',
+    ];
+
     public function products(): HasMany
     {
         return $this->hasMany(Product::class);

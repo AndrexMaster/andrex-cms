@@ -10,24 +10,35 @@ import { AutocompleteField } from '@components/Fields/AutocompleteField';
 import { useAppDispatch, useAppSelector } from '@store/hooks';
 import { setProduct, updateProduct } from '@store/slices/productSlice';
 import useDebounce from '@hooks/use-debounce';
-import { Product, ProductPhoto } from '@types/product';
+import { Product, ProductPhoto, ProductTemplate } from '@types/product';
+import { AButton } from '@components/Buttons';
+import { addProduct } from '@store/thunks/productThunks';
 
-export default function Pages(props: unknown) {
-    const storedProduct: Product = useAppSelector((state) => state.product.product);
+type ProductPageProps = {
+    product: Product;
+}
+
+export default function Pages(props: ProductPageProps) {
+    const storedProduct: Product | ProductTemplate = useAppSelector((state) => state.product.product);
     const dispatch = useAppDispatch();
 
-    const [productTitle, setProductTitle] = useState<string>('');
+    const [productTitle, setProductTitle] = useState<string>(props?.product?.title ?? storedProduct.title);
+    const [productPrice, setProductPrice] = useState<number>(props?.product?.price ?? storedProduct.price);
+    const productSlug = useSlugifyString(productTitle);
 
     const debouncedSearchTerm = useDebounce<string>(productTitle, 500);
 
     useEffect(() => {
+
         dispatch(
             updateProduct({
                 ...storedProduct,
                 title: debouncedSearchTerm,
+                slug: productSlug,
+                price: productPrice,
             }),
         );
-    }, [debouncedSearchTerm, dispatch, storedProduct]);
+    }, [debouncedSearchTerm, dispatch, productPrice]);
 
     useEffect(() => {
         if (props.product) {
@@ -43,6 +54,18 @@ export default function Pages(props: unknown) {
             }),
         );
     };
+
+    useEffect(() => {
+        if (props?.product) {
+            dispatch(setProduct(props.product));
+        }
+    }, [props]);
+    
+    const formSubmit = (e) => {
+        e.preventDefault();
+
+        dispatch(addProduct(storedProduct))
+    }
 
     const tempArray = [
         // Категории
@@ -72,15 +95,16 @@ export default function Pages(props: unknown) {
         // useSlugifyProductName
         <AppLayout>
             <AdminContentLayout contentActionsVariant={'editing'}>
-                <div className={'flex flex-col gap-6'}>
+                <form onSubmit={formSubmit} className={'flex flex-1 flex-col gap-6'}>
                     <div className={'flex flex-row gap-4'}>
-                        <TextField title={'Product Title'} placeholder={'Product Title'} defaultValue={''} onChange={(val) => setProductTitle(val)} />
                         <TextField
-                            title={'Product slug'}
-                            placeholder={'Product slug'}
-                            defaultValue={useSlugifyString(productTitle)}
-                            disabled={true}
+                            title={'Product Title'}
+                            placeholder={'Product Title'}
+                            defaultValue={productTitle}
+                            onChange={(val) => setProductTitle(val)}
+                            value={productTitle}
                         />
+                        <TextField title={'Product slug'} placeholder={'Product slug'} value={useSlugifyString(productTitle)} disabled={true} />
                     </div>
                     <div className={'flex flex-row gap-4'}>
                         <AutocompleteField
@@ -90,16 +114,27 @@ export default function Pages(props: unknown) {
                             isLoading={false}
                             searchableList={tempArray}
                         />
+                        <TextField
+                            title={'Product price'}
+                            placeholder={'Product price'}
+                            defaultValue={productPrice}
+                            value={productPrice}
+                            onChange={(val) => setProductPrice(val)}
+                            type={'number'}
+                        />
                     </div>
                     <hr />
                     <ImageModificationContainer addImage={addImage}>
-                        <ImageList maxHeight={150} images={storedProduct.photos} />
+                        {/*<ImageList maxHeight={150} images={storedProduct.photos} />*/}
                     </ImageModificationContainer>
                     <hr />
                     <ProductMainData />
                     {/*<hr/>*/}
                     {/*<ProductAdditionalData/>*/}
-                </div>
+                    <AButton className={'mt-auto'} type={'submit'} color={'success'}>
+                        Submit
+                    </AButton>
+                </form>
             </AdminContentLayout>
         </AppLayout>
     );

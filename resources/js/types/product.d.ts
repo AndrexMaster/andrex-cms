@@ -1,10 +1,11 @@
 export type Product = {
-    id: number;
+    id?: number;
     slug: string;
     title: string;
+    price: number;
     description: string;
-    photos: ProductPhoto[];
-    characteristics: ProductCharacteristic[];
+    photos: ProductPhoto[] | [];
+    characteristics: ProductCharacteristic[] | [];
 }
 export type ProductCharacteristicKey = {
     id: number;
@@ -31,12 +32,13 @@ export type ProductPhoto = {
 // Templates
 
 export type ProductTemplate = {
-    id: null;
-    slug: null;
-    title: null;
-    description: null;
-    photos: ProductPhoto[] | null;
-    characteristics: ProductCharacteristicTemplate[] | null;
+    id?: number;
+    slug: string;
+    title: string;
+    price: number;
+    description: string;
+    photos: ProductPhoto[] | [];
+    characteristics: ProductCharacteristicTemplate[] | [];
 }
 
 

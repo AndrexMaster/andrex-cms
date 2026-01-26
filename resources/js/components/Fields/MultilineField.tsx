@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { DefaultFieldProps } from '@types/fields';
 import { FieldLayout } from '@components/Fields';
 
-interface MultilineFieldInterface extends DefaultFieldProps{
+interface MultilineFieldInterface extends DefaultFieldProps<'text'>{
     rows?: number;
     cols?: number;
 }

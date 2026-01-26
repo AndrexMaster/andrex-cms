@@ -1,16 +1,18 @@
 import { AutocompleteField, MultilineField, TextField } from '@components/Fields';
 import { useEffect, useMemo, useState } from 'react';
 import { Plus } from 'lucide-react';
-import { ProductCharacteristic, ProductCharacteristicKey, ProductCharacteristicTemplate } from '@types/product';
+import { Product, ProductCharacteristic, ProductCharacteristicKey, ProductCharacteristicTemplate, ProductTemplate } from '@types/product';
+import { updateProduct } from '@store/slices/productSlice';
+import { useAppDispatch, useAppSelector } from '@store/hooks';
+import React from 'react';
+import { usePage } from '@inertiajs/react';
 
-interface ProductMainDataInterface {
+export const ProductMainData = () => {
+    const page = usePage();
+    const storedProduct: Product | ProductTemplate = useAppSelector((state) => state.product.product);
+    const dispatch = useAppDispatch();
 
-}
-
-export const ProductMainData = (props: ProductMainDataInterface) => {
-    const {
-
-    } = props;
+    const [description, setDescription] = useState<string>(page?.props?.product?.description ?? storedProduct.description);
 
     const characteristicTemplate: ProductCharacteristicTemplate = {
         id: null,
@@ -73,6 +75,16 @@ export const ProductMainData = (props: ProductMainDataInterface) => {
       //
     }
 
+    useEffect(() => {
+
+        dispatch(
+            updateProduct({
+                ...storedProduct,
+                description: description,
+            }),
+        );
+    }, [description, dispatch]);
+
     return (
         <div className={'flex flex-row gap-4'}>
             {/*<TextField*/}
@@ -81,40 +93,36 @@ export const ProductMainData = (props: ProductMainDataInterface) => {
             {/*    defaultValue={''}*/}
             {/*/>*/}
 
-            <MultilineField
-                title={'Product name'}
-                placeholder={'Product name'}
-                defaultValue={''}
-            />
+            <MultilineField title={'Product name'} placeholder={'Product name'} defaultValue={description} onChange={setDescription} />
             <div className={'flex flex-col gap-6'}>
                 <div className={'flex flex-col gap-6'}>
                     {characteristicsList?.map((characteristic, index) => (
-                        <div
-                            key={characteristic.id ?? index}
-                             className={'flex flex-row gap-4'}
-                        >
+                        <div key={characteristic.id ?? index} className={'flex flex-row gap-4'}>
                             <AutocompleteField
                                 defaultValue={characteristic.characteristicKey.title}
-                                placeholder={"Назва характеристики"}
+                                placeholder={'Назва характеристики'}
                                 searchableList={[]}
-                                title={"Назва характеристики"}
+                                title={'Назва характеристики'}
                                 allowCreate={true}
                             />
                             <TextField
                                 defaultValue={characteristic.value}
                                 title={'Значення характеристики'}
-                                placeholder={"Значення характеристики"}
+                                placeholder={'Значення характеристики'}
+                                value={''}
                             />
                         </div>
                     ))}
                 </div>
                 <div
                     onClick={() => addNewCharacteristic()}
-                    className={'flex flex-1-0 items-center justify-center border p-1 rounded-sm bg-[#FFFFFF17] transition shadow-lg hover:shadow-cyan-50/10 cursor-pointer'}
+                    className={
+                        'flex-1-0 flex cursor-pointer items-center justify-center rounded-sm border bg-[#FFFFFF17] p-1 shadow-lg transition hover:shadow-cyan-50/10'
+                    }
                 >
-                    <Plus size={16}/>
+                    <Plus size={16} />
                 </div>
             </div>
         </div>
-  )
+    );
 }
