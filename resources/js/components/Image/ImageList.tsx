@@ -15,14 +15,11 @@ export const ImageList = (props: ImageListProps) => {
         maxHeight
     } = props;
 
-    const [sortedImages, setSortedImages] = useState<ImageDataInterface[]>();
-
-    useEffect(() => {
+    const sortedImages = useMemo(() => {
         if (images && images.length > 0) {
-            const newSortedImages = [...images].sort((a, b) => a.position - b.position);
-            setSortedImages(newSortedImages);
+            return [...images].sort((a, b) => a.position - b.position);
         } else {
-            setSortedImages([]);
+            return [];
         }
     }, [images]);
 
@@ -39,7 +36,7 @@ export const ImageList = (props: ImageListProps) => {
             <div className={`flex flex-col gap-2 overflow-y-auto box-border pr-3` +  (maxHeight ? ` max-h-[${maxHeight}px]` : '')}>
                 {sortedImages?.map((imageData, index) => (
                     <div
-                        keu={index}
+                        key={index}
                         className={'flex gap-6 justify-start py-2 px-2 rounded-sm border items-center'}>
                         <ImageContainer
                             key={imageData.id ?? index}

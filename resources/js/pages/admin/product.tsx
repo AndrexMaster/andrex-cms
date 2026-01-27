@@ -125,7 +125,7 @@ export default function Pages(props: ProductPageProps) {
                     </div>
                     <hr />
                     <ImageModificationContainer addImage={addImage}>
-                        {/*<ImageList maxHeight={150} images={storedProduct.photos} />*/}
+                        <ImageList maxHeight={150} images={storedProduct.photos} />
                     </ImageModificationContainer>
                     <hr />
                     <ProductMainData />
