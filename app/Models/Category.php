@@ -11,10 +11,16 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $primaryKey = 'slug';
     protected $fillable = [
         'name',
         'slug',
+        'description',
+        'parent_id',
+    ];
+
+    protected $casts = [
+        'id' => 'integer',
+        'slug' => 'string',
         'description',
         'parent_id',
     ];

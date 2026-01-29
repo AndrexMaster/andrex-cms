@@ -10,9 +10,8 @@ class Product extends Model
 {
     use HasFactory;
 
-    protected  $primaryKey = 'slug';
     protected $fillable = [
-        'name',
+        'title',
         'slug',
         'description',
         'price',
@@ -25,7 +24,8 @@ class Product extends Model
     ];
 
     protected $casts = [
-        'id' => 'uuid',
+        'id' => 'integer',
+        'slug' => 'string',
         'is_active' => 'boolean',
         'price' => 'decimal:2',
         'images' => 'array',

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Web;
+namespace App\Http\Controllers\Admin\Web;
 
 use App\Http\Controllers\Controller;
 use App\Models\Product;
@@ -13,17 +13,15 @@ class ProductController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index(Request $request): Response
+    public function index(): Response
     {
         $products = Product::with('category')->latest()->paginate(15);
 
         return Inertia::render('admin/products', ['products' => $products]);
     }
 
-    public function show(string $slug): Response
+    public function show(Product $product): Response
     {
-        $product = Product::query()->findOrFail($slug);
-
         return Inertia::render('admin/product', ['product' => $product]);
     }
 

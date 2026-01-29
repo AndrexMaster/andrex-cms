@@ -4,7 +4,7 @@ import { SearchableItemInterface, searchInArray } from '@lib/';
 import { FieldLayout } from '@components/Fields';
 import { ListDropper } from '@components/common/';
 
-interface AutocompleteFieldInterface extends DefaultFieldProps{
+interface AutocompleteFieldInterface extends DefaultFieldProps<'text'>{
     searchableList: SearchableItemInterface[];
     isAsync?: boolean;
     isLoading?: boolean;

@@ -5,9 +5,9 @@ export interface DefaultFieldProps<Type> {
     type?: Type;
     className?: string;
     disabled?: boolean;
-    onChange?: (value) => void;
-    onFocus?: (value) => void;
-    onBlur?: (value) => void;
+    onChange?: (value: Type extends 'text' ? string : any) => void;
+    onFocus?: (value: any) => void;
+    onBlur?: (value: any) => void;
     name?: string;
     required?: boolean;
 }

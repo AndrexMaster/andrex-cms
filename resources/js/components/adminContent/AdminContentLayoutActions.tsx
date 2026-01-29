@@ -2,6 +2,7 @@ import { AButton } from '@components/Buttons';
 import { Plus, Trash2, FileDown } from 'lucide-react';
 import { router, usePage } from '@inertiajs/react';
 import { useMemo } from 'react';
+import React from 'react';
 
 export interface AdminContentLayoutActionsProps {
     variant?: 'editing' | 'creating' | 'browsing'
@@ -25,13 +26,15 @@ export const AdminContentLayoutActions = (props: AdminContentLayoutActionsProps)
 
     return (
         <div className={'flex gap-4 items-center flex-row'}>
-            <AButton
-                type={'link'}
-                href={creationPageLink}
-                endIcon={<Plus size={18}/>}
-            >
-                Add
-            </AButton>
+            {variant !== 'creating' && (
+                <AButton
+                    type={'link'}
+                    href={creationPageLink}
+                    endIcon={<Plus size={18}/>}
+                >
+                    Add
+                </AButton>
+            )}
             {selectedItemId && (
                 <AButton endIcon={<Trash2 size={18} />}>Remove</AButton>
             )}

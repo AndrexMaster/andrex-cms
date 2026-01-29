@@ -1,9 +1,9 @@
-import AppLayout from '@/layouts/app-layout';
-import SettingsLayout from '@/layouts/settings/layout';
-import { type BreadcrumbItem } from '@/types';
-import { Transition } from '@headlessui/react';
+import { AppLayout } from '@layouts/app-layout';
+import SettingsLayout from '@layouts/settings/layout';
 import { Head, useForm } from '@inertiajs/react';
 import { FormEventHandler, useRef } from 'react';
+import { BreadcrumbItem } from '@types/global';
+import React from 'react';
 
 
 const breadcrumbs: BreadcrumbItem[] = [

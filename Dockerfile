@@ -23,4 +23,13 @@ RUN docker-php-ext-install -j$(nproc) pdo_pgsql # Отдельный шаг дл
 WORKDIR /var/www/html
 COPY . /var/www/html
 
-RUN composer install --no-dev --optimize-autoloader
+RUN mkdir -p storage/framework/sessions \
+             storage/framework/views \
+             storage/framework/cache \
+             bootstrap/cache
+
+RUN chmod -R 775 storage bootstrap/cache
+
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+RUN php artisan package:discover --ansi

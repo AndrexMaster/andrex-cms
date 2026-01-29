@@ -2,8 +2,8 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { DefaultFieldProps } from '@types/fields';
 import { FieldLayout } from '@components/Fields/FieldLayout';
 
-interface TextFieldInterface extends DefaultFieldProps<'text' | 'password'> {
-    value: string;
+interface TextFieldInterface extends DefaultFieldProps<'text' | 'number' | 'password'> {
+    value: string | number;
 }
 
 export const TextField = (props: TextFieldInterface) => {
