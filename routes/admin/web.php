@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\Web\CategoryController;
-use App\Http\Controllers\Web\ProductController;
+use App\Http\Controllers\Admin\Web\CategoryController;
+use App\Http\Controllers\Admin\Web\ProductController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
