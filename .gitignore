@@ -22,6 +22,7 @@ npm-debug.log
 yarn-error.log
 .pnpm-store/ # Если используете pnpm
 /build # Output directory for compiled assets (if not public/build)
+/public/build # Output directory for compiled assets (if not public/build)
 /dist # Another common output directory
 /.tsbuildinfo # TypeScript build info file
 *.tsbuildinfo
