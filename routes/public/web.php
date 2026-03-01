@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Public\Web\CartItemsController;
 use App\Http\Controllers\Public\Web\PublicProductController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -8,6 +9,7 @@ Route::get('/', function () {
     return Inertia::render('public/home');
 })->name('home');
 
+Route::get('cart', [CartItemsController::class, 'index'])->name('cart.products');
 
 Route::get('products', [PublicProductController::class, 'index'])->name('category.products');
 Route::get('{category:slug}/products', function () {

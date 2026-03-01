@@ -1,9 +1,9 @@
-import { AppLayout } from '@layouts/app-layout';
 import SettingsLayout from '@layouts/settings/layout';
 import { Head, useForm } from '@inertiajs/react';
-import { FormEventHandler, useRef } from 'react';
+import { useRef } from 'react';
 import { BreadcrumbItem } from '@types/global';
 import React from 'react';
+import { AppLayout } from '@layouts/app';
 
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -23,7 +23,7 @@ export default function Password() {
         password_confirmation: '',
     });
 
-    const updatePassword: FormEventHandler = (e) => {
+    const updatePassword = (e) => {
         e.preventDefault();
 
         put(route('password.update'), {

@@ -1,5 +1,5 @@
 export type Product = {
-    id?: number;
+    id: number;
     slug: string;
     title: string;
     price: number;

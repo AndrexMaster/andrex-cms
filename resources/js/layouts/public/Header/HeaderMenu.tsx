@@ -14,6 +14,10 @@ export  const HeaderMenu = (props: HeaderMenuProps) => {
             href: '/',
         },
         {
+            title: 'Products',
+            href: '/products',
+        },
+        {
             title: 'About',
             href: '/about',
         },
@@ -21,10 +25,6 @@ export  const HeaderMenu = (props: HeaderMenuProps) => {
             title: 'Contact',
             href: '/contact',
         },
-        {
-            title: 'Products',
-            href: '/products',
-        }
     ]
 
     return (

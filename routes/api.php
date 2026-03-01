@@ -7,4 +7,5 @@ Route::prefix('v1')->group(function () {
         require __DIR__ . '/admin/FileManager/FileManagerApi.php';
         require __DIR__ . '/admin/ProductApi.php';
     });
+    require __DIR__ . '/public/ProductCartApi.php';
 });

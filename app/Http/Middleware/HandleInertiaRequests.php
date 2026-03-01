@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\CartItems;
 use Illuminate\Foundation\Inspiring;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
@@ -46,6 +47,7 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            'cartItemsCount' => CartItems::query()->count(),
             'ziggy' => fn (): array => [
                 ...(new Ziggy)->toArray(),
                 'location' => $request->url(),

@@ -1,9 +1,10 @@
 import { Head } from '@inertiajs/react';
+import { AppLayout } from '@layouts/app';
+import React from 'react';
+import SettingsLayout from '@layouts/settings/layout';
+import { BreadcrumbItem } from '@types/global';
 
-import { type BreadcrumbItem } from '@/types';
 
-import AppLayout from '@/layouts/app-layout';
-import SettingsLayout from '@/layouts/settings/layout';
 
 const breadcrumbs: BreadcrumbItem[] = [
     {

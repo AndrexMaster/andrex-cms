@@ -31,7 +31,6 @@ export const getProduct = createAsyncThunk(
 
 export const addProduct = createAsyncThunk<
     { product: Product },
-    { name: string; parent_id?: string | null },
     { rejectValue: string }
 >(
     'admin/products/addProduct',
@@ -39,6 +38,23 @@ export const addProduct = createAsyncThunk<
         try {
             const url = '/api/v1/admin/products';
             const response = await axios.post(url, product);
+
+            return response.data;
+        } catch (error: any) {
+            return rejectWithValue(error.response?.data?.message || error.message || 'Error adding product');
+        }
+    }
+);
+
+export const addProductToCart = createAsyncThunk<
+    { rejectValue: string },
+    { product_id: number }
+>(
+    'admin/products/addProductToCart',
+    async (product_id, { rejectWithValue }) => {
+        try {
+            const url = '/api/v1/cart';
+            const response = await axios.post(url, product_id);
 
             return response.data;
         } catch (error: any) {
